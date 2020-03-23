@@ -15,7 +15,18 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+
+from ..api.views import (AuthTokenView, ServicesTokenView, UsersAdvancedView,
+                         UsersBaseView, UsersLoginView)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('token/', ServicesTokenView.as_view()),
+    path('user/auth/', AuthTokenView.as_view()),
+    path('user/add/', UsersBaseView.as_view()),
+    path('user/login/', UsersLoginView.as_view()),
+    path('user/<uuid:uuid>/', UsersAdvancedView.as_view())
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)

@@ -118,3 +118,29 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SERVICES_CREDENTIALS = {
+    'users' : {
+        'id' : '',
+        'secret' : ''
+    },
+    'messages' : {
+        'id' : '',
+        'secret' : ''
+    },
+    'headings' : {
+        'id' : '',
+        'secret' : ''
+    },
+    'statistics' : {
+        'id' : '',
+        'secret' : ''
+    }
+}
+
+SERVICES_URL = {
+    'users' : '',
+    'messages' : '',
+    'headings' : '',
+    'statistics' : ''
+}
