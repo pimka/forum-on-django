@@ -123,3 +123,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'api.User'
+
+URLS = {
+    'auth-token': 'http://localhost:8080/tokens',
+    'send-credentials': 'http://localhost:8080/users',
+    'update-credentials' : 'http://localhost:8080/users/{uuid}'
+}
