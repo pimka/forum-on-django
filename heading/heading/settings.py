@@ -120,3 +120,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+URLS = {
+    'auth-token': 'http://localhost:8080/tokens',
+    'send-credentials': 'http://localhost:8080/users',
+    'update-credentials' : 'http://localhost:8080/users/{uuid}'
+}
