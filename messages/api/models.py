@@ -9,3 +9,4 @@ class MessageModel(models.Model):
     parent = models.UUIDField(null=True)
     file = models.FileField(null=True)
     image = models.ImageField(null=True)
+    user_uuid = models.UUIDField(null=False, unique=False)
