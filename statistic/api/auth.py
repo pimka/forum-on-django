@@ -7,13 +7,13 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
+from ..heading.settings import URLS
 
-URLS = getattr(settings, 'URLS')
 ERRORS_FIELD = getattr(settings, 'ERRORS_FIELD', 'error')
 STORAGE = StrictRedis(decode_responses=True)
 
 ID = getattr(settings, 'APPID', 'users')
-SECRET = getattr(settings, 'APPSECRET', 'users8081')
+SECRET = getattr(settings, 'APPSECRET', 'users-secret')
 TOKEN_LABEL = getattr(settings, 'TOKEN_LABEL', 'users-service-token')
 
 class TokenAuth(TokenAuthentication):
@@ -31,7 +31,7 @@ class TokenAuth(TokenAuthentication):
 
     def authenticate(self, token):
         try:
-            response = requests.get(URLS['auth-token'], headers={'Authentication': token})
+            response = requests.get(URLS['authenticate'], headers={'Authentication': token})
         except requests.RequestException as err:
             return { ERRORS_FIELD : str(err)}, 503
 

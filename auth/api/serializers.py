@@ -1,9 +1,9 @@
+from django.conf import settings
 from rest_framework import serializers
-
-from auth.auth.settings import SERVICES_CREDENTIALS
 
 from .models import UserCredentialsModel
 
+SERVICES_CREDENTIALS = getattr(settings, 'SERVICES_CREDENTIALS')
 
 class UserCredentialSerializer(serializers.ModelSerializer):
     class Meta:

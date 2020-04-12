@@ -31,8 +31,14 @@ class BaseView(APIView):
 
 class MessageBaseOperations(BaseView):
     def get(self, request):
-        self.info(request, 'getting all messages')
-        messages = MessageModel.objects.all()
+        self.info(request, 'getting all messages to heading')
+        head = request.query_params.get('heading')
+
+        if head:
+            messages = MessageModel.objects.filter(head_uuid=head)
+        else:
+            messages = MessageModel.objects.all()
+            
         serializer = MessageSerializer(data=messages, many=True)
         return Response(serializer.data)
 

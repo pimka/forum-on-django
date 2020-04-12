@@ -1,18 +1,18 @@
 import binascii
 import os
 
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class UserCredentialsModel(User):
+class UserCredentialsModel(AbstractUser):
     uuid = models.UUIDField(unique=True, null=False, editable=False)
 
 class TokenBaseModel(models.Model):
     class Meta:
         abstract = True
 
-    token = models.CharField(verbose_name='Token', unique=True)
+    token = models.CharField(verbose_name='Token', unique=True, max_length=20)
     created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

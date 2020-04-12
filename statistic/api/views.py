@@ -5,11 +5,16 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from .auth import TokenAuth
 from .models import StatisicModel
+from .permissions import IsAuthenticate
 from .serializers import StatisticSerializer
 
 
 class StatisticOperations(APIView):
+    authentication_classes = (TokenAuth, )
+    permission_classes = (IsAuthenticate, )
+
     logger = getLogger('auth')
     __format = '{method} | {content_type} | {message}'
 

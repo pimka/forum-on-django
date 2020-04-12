@@ -69,6 +69,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'statistic.wsgi.application'
 
+AUTHENTICATION_BACKENDS = [
+    'api.back.AuthBackend',
+]
 
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases

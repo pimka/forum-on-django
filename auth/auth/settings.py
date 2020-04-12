@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'api',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +70,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'auth.wsgi.application'
+
+AUTH_USER_MODEL = 'api.UserCredentialsModel'
 
 
 # Database
@@ -121,8 +125,8 @@ STATIC_URL = '/static/'
 
 SERVICES_CREDENTIALS = {
     'users' : {
-        'id' : '',
-        'secret' : ''
+        'id' : 'users',
+        'secret' : 'users8081'
     },
     'messages' : {
         'id' : '',
