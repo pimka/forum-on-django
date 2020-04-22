@@ -14,3 +14,4 @@ class HeadingModel(models.Model):
     header = models.CharField(max_length=250, null=False)
     body = models.TextField(null=False)
     views = models.PositiveIntegerField()
+    created = models.DateTimeField(auto_now_add=True)

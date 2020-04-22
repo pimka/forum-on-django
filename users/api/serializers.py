@@ -9,7 +9,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'uuid', 'username', 'is_moderate', 'password']
+        fields = ['uuid', 'username', 'is_staff', 'password']
         extra_kwargs = {'password':{'write_only':True}}
 
     def create(self, validated_data):
@@ -20,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
         credentials = {
             'username' : validated_data['username'],
             'password' : validated_data.get('password'),
-            'uuid' : user.uuid
+            'uuid' : user.uuid,
+            'is_staff' : user.is_staff
         }
         response, status = send_credentials(credentials)
         
@@ -34,16 +35,17 @@ class UserSerializer(serializers.ModelSerializer):
         credentials = dict()
 
         if validated_data.get('username'):
-            username = validated_data.get('username')
+            username = validated_data.pop('username')
             credentials['username'] = username
             instance.username = username
 
-        if validated_data.get('is_moderate'):
-            moder = validated_data.get('is_moderate') and instance.is_stuff
-            instance.is_moderate = moder
+        if validated_data.get('is_staff'):
+            is_staff = validated_data.pop('is_staff')
+            credentials['is_staff'] = is_staff
+            instance.is_moderate = is_staff
 
         if validated_data.get('password'):
-            password = validated_data.get('password')
+            password = validated_data.pop('password')
             credentials['password'] = password
             instance.set_password(password)
 

@@ -122,3 +122,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+AUTHENTICATION_BACKENDS = [
+    'api.back.AuthBackend'
+]

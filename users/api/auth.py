@@ -10,7 +10,11 @@ from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
 URLS = getattr(settings, 'URLS')
 ERRORS_FIELD = getattr(settings, 'ERRORS_FIELD', 'error')
-STORAGE = StrictRedis(decode_responses=True)
+__default_redis_conf = {
+    'host': 'localhost',
+    'port': 6379, 'db': 0, 'password': None, 'decode_responses': True}
+REDIS_CONF = getattr(settings, 'REDIS_CONF', __default_redis_conf)
+STORAGE = StrictRedis(**REDIS_CONF)
 
 ID = getattr(settings, 'APPID', 'users')
 SECRET = getattr(settings, 'APPSECRET', 'users8081')
@@ -20,14 +24,17 @@ class TokenAuth(TokenAuthentication):
     keyword = 'Bearer'
     
     def authenticate_credentials(self, key):
-        data, st = self.authenticate(key)
+        data, st = self.authenticate(token=f"{self.keyword} {key}")
 
         if st != 200:
-            msg = data.get('error', 'Invalid token')
+            msg = data.get(ERRORS_FIELD, 'Invalid token')
             raise AuthenticationFailed(msg, 'authentication')
+        
+        if st == 200:
+            data['token'] = key
+            return (None, data)
 
-        data['token'] = key
-        return (None, data)
+        return None
 
     def authenticate(self, token):
         try:

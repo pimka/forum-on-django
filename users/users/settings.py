@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'rest_framework.authtoken',
     'api',
 ]
 
@@ -129,3 +128,7 @@ URLS = {
     'send-credentials': 'http://localhost:8080/users',
     'update-credentials' : 'http://localhost:8080/users/{uuid}'
 }
+
+AUTHENTICATION_BACKENDS = [
+    'api.back.AuthBackend'
+]

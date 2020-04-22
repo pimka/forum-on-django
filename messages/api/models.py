@@ -10,3 +10,4 @@ class MessageModel(models.Model):
     file = models.FileField(null=True)
     image = models.ImageField(null=True)
     user_uuid = models.UUIDField(null=False, unique=False)
+    created = models.DateTimeField(auto_now_add=True)

@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders'
     'rest_framework',
     'api.apps.ApiConfig'
 ]
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -126,3 +128,9 @@ URLS = {
     'send-credentials': 'http://localhost:8080/users',
     'update-credentials' : 'http://localhost:8080/users/{uuid}'
 }
+
+AUTHENTICATION_BACKENDS = [
+    'api.back.AuthBackend'
+]
+
+CORS_ORIGIN_ALLOW_ALL = True

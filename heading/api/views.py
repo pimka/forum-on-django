@@ -1,23 +1,31 @@
 from logging import getLogger
 
+from celery import Celery
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from celery_queue.config import Config
+
 from .auth import TokenAuth
 from .models import HeadingModel, TagModel
 from .permissions import IsAuthenticate, IsOwner
 from .serializers import HeadingSerializer, TagSerializer
-import celery_queue.tasks as tasks
 
-URL = {
-    'statistic' : ''
-}
 
 class BaseView(APIView):
+    celery = Celery()
+    task_name = 'task.statistic.heading'
     logger = getLogger('auth')
     __format = '{method} | {content_type} | {message}'
+
+    def __init__(self, **kwargs):
+        self.celery.config_from_object(Config)
+        super().__init__(**kwargs)
+
+    def send_task(self, operation, user_uuid=None, before=None, after=None):
+        self.celery.send_task(self.task_name, [user_uuid, operation, before, after])
 
     def exception(self, request, message):
         self.logger.exception(self.__format.format(
@@ -33,14 +41,6 @@ class BaseView(APIView):
             message = message
         ))
 
-    def json_for_statistic(self, request, operation, before=None, after=None):
-        return {
-            'user_uuid' : request.auth.get('uuid') if bool(request.auth) else '',
-            'operation' : operation,
-            'before_changes' : before,
-            'after_changes' : after
-        }
-
 class TagBaseOperations(BaseView):
     authentication_classes = [TokenAuth]
     permission_classes = [IsAuthenticate]
@@ -50,7 +50,7 @@ class TagBaseOperations(BaseView):
         tags = TagModel.objects.all()
         serializer = TagSerializer(data=tags, many=True)
 
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'GET TAGS'))
+        self.send_task('GET TAGS', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def post(self, request):
@@ -58,7 +58,7 @@ class TagBaseOperations(BaseView):
         serializer = TagSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'POST TAG'))
+            self.send_task('POST TAG', request.auth.get('uuid'), after=serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -70,7 +70,7 @@ class HeadingBaseOperations(BaseView):
         heads = HeadingModel.object.all()
         serializer = HeadingSerializer(data=heads, many=True)
 
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'GET HEADINGS'))
+        self.send_task('GET HEADINGS', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def post(self, request):
@@ -78,7 +78,7 @@ class HeadingBaseOperations(BaseView):
         serializer = HeadingSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'POST HEADING'))
+            self.send_task('POST HEADING', request.auth.get('uuid'), after=serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -99,20 +99,18 @@ class TagAdvancedOperations(BaseView):
         tag = self.get_object(uuid)
         serializer = TagSerializer(tag)
 
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'GET TAG'))
+        self.send_task('GET TAG', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def patch(self, request, uuid):
         self.info(request, f'changing tag {uuid}')
         tag = self.get_object(uuid)
+        old_data = TagSerializer(tag)
         serializer = TagSerializer(tag, request.data)
 
         if serializer.is_valid():
             serializer.save()
-            tasks.post.delay(
-                URL['statistic'], 
-                self.json_for_statistic(request, 'PATCH TAG', request.data, serializer.data)
-            )
+            self.send_task('PATCH TAG', request.auth.get('uuid'), old_data.data, serializer.data)
             return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -121,9 +119,10 @@ class TagAdvancedOperations(BaseView):
     def delete(self, request, uuid):
         self.info(request, f'deleting tag {uuid}')
         tag = self.get_object(uuid)
+        old_data = TagSerializer(tag)
         tag.delete()
 
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'DELETE TAG'))
+        self.send_task('DELETE TAG', request.auth.get('uuid'), before=old_data.data)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class HeadingAdvancedOperations(BaseView):
@@ -143,17 +142,18 @@ class HeadingAdvancedOperations(BaseView):
         head.save()
 
         serializer = HeadingSerializer(head)
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'GET HEADING'))
+        self.send_task('GET HEADING', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def patch(self, request, uuid):
         self.info(request, f'changing heading {uuid}')
         head = self.get_object(uuid)
+        old_data = HeadingSerializer(head)
         serializer = HeadingSerializer(head, request.data)
 
         if serializer.is_valid():
             serializer.save()
-            tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'PATCH HEADING'))
+            self.send_task('PATCH HEADING', request.auth.get('uuid'), old_data.data, serializer.data)
             return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -162,6 +162,8 @@ class HeadingAdvancedOperations(BaseView):
     def delete(self, request, uuid):
         self.info(request, f'deleting heading {uuid}')
         head = self.get_object(uuid)
+        old_data = HeadingSerializer(head)
         head.delete()
-        tasks.post.delay(URL['statistic'], self.json_for_statistic(request, 'DELETE HEADING'))
+
+        self.send_task('DELETE HEADING', request.auth.get('uuid'), before=old_data.data)
         return Response(status=status.HTTP_204_NO_CONTENT)

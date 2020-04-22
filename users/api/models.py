@@ -5,4 +5,3 @@ from django.db import models
 
 class User(AbstractUser):
     uuid = models.UUIDField(default=uuid.uuid4, editable=False)
-    is_moderate = models.BooleanField(default=False)

@@ -67,14 +67,14 @@ class UsersLoginView(BaseView):
     def post(self, request):
         self.info(request, f'{request.user.username} request for token')
         token, created = self.model.objects.get_or_create(user=request.user)
-        return Response({ 'token' : token.token }, status.HTTP_200_OK)
+        return Response({ 'token' : token.token, 'uuid':request.user.uuid, 'is_superuser':request.user.is_superuser }, status.HTTP_200_OK)
 
 class AuthTokenView(BaseView):
     authentication_classes = (AuthTokenAuth, )
 
     def get(self, request):
         self.info(request, f'check user {request.auth}')
-        return Response(status=status.HTTP_200_OK)
+        return Response(data={'uuid':request.user.uuid, 'is_staff':request.user.is_staff}, status=status.HTTP_200_OK)
 
 class UsersBaseView(BaseView):
     model = UserCredentialsModel
@@ -95,11 +95,11 @@ class UsersAdvancedView(BaseView):
     serializer = UserCredentialSerializer
     authentication_classes = (AuthTokenAuth, )
 
-    def put(self, request, uuid):
+    def patch(self, request, uuid):
         self.info(request, f'Change user {uuid}')
         
         try:
-            user = self.model.objects.get(pk=uuid)
+            user = self.model.objects.get(uuid=uuid)
         except self.model.DoesNotExist:
             self.exception(f'User {uuid} not found')
             return Response(status=status.HTTP_404_NOT_FOUND)

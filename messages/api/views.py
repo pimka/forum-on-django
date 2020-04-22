@@ -1,9 +1,12 @@
 from logging import getLogger
 
+from celery import Celery
 from django.http import Http404
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from celery_queue.config import Config
 
 from .auth import TokenAuth
 from .models import MessageModel
@@ -12,8 +15,17 @@ from .serializers import MessageSerializer
 
 
 class BaseView(APIView):
+    celery = Celery()
+    task_name = 'task.statistic.message'
     logger = getLogger('auth')
     __format = '{method} | {content_type} | {message}'
+
+    def __init__(self, **kwargs):
+        self.celery.config_from_object(Config)
+        super().__init__(**kwargs)
+
+    def send_task(self, operation, user_uuid=None, before=None, after=None):
+        self.celery.send_task(self.task_name, [user_uuid, operation, before, after])
 
     def exception(self, request, message):
         self.logger.exception(self.__format.format(
@@ -38,8 +50,9 @@ class MessageBaseOperations(BaseView):
             messages = MessageModel.objects.filter(head_uuid=head)
         else:
             messages = MessageModel.objects.all()
-            
+        
         serializer = MessageSerializer(data=messages, many=True)
+        self.send_task('GET MESSAGES', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def post(self, request):
@@ -47,6 +60,7 @@ class MessageBaseOperations(BaseView):
         serializer = MessageSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            self.send_task('POST MESSAGE', request.auth.get('uuid'), after=serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -66,15 +80,19 @@ class MessageAdvancedOperations(BaseView):
         self.info(request, f'get message {uuid}')
         message = self.get_object(uuid)
         serializer = MessageSerializer(message)
+
+        self.send_task('GET MESSAGE', request.auth.get('uuid'), after=serializer.data)
         return Response(serializer.data)
 
     def patch(self, request, uuid):
         self.info(request, f'changing message {uuid}')
         message = self.get_object(uuid)
+        old_data = MessageSerializer(message)
         serializer = MessageSerializer(message, request.data)
 
         if serializer.is_valid():
             serializer.save()
+            self.send_task('PATCH MESSAGE', request.auth.get('uuid'), old_data.data, serializer.data)
             return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -83,5 +101,8 @@ class MessageAdvancedOperations(BaseView):
     def delete(self, request, uuid):
         self.info(request, f'deleting message {uuid}')
         message = self.get_object(uuid)
+        old_data = MessageSerializer(message)
         message.delete()
+
+        self.send_task('DELETE MESSAGE', request.auth.get('uuid'), before=old_data.data)
         return Response(status=status.HTTP_204_NO_CONTENT)
