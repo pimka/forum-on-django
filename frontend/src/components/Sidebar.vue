@@ -27,7 +27,6 @@ export default {
     data () {
     return {
       heads: [],
-      err: ''
     }
   },
 
@@ -36,7 +35,12 @@ export default {
       HTTP.get('/headings/').then(response => {
         this.items = response.data
         console.log(response.data)
-      }).catch(err => { this.err = err.message })
+      }).catch(err => { 
+        this.$bvToast.toast(err.message, {
+          title: 'Error',
+          variant: 'danger'
+        })
+      })
     }
   }
 }

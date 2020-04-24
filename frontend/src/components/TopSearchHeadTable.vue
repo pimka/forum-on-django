@@ -1,6 +1,7 @@
 <template>
     <div>
-        <b-table v-if="items.length > 0" :fields="fields" :items="items" head-variant="light" striped="true">
+        <h3>Top headings</h3>
+        <b-table :fields="fields" :items="items" head-variant="light" striped="true">
         </b-table>
     </div>
 </template>

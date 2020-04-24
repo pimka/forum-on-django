@@ -12,8 +12,6 @@
                 <b-form-select v-model="selected" :options="tags" multiple id="inputTags"/>
             </b-form-group>
             <b-button type="submit" variant="primary">Create</b-button>
-            <b-alert v-for="err in createErrors" :key="err" show dismissible fade variant="danger">{{ err }}</b-alert>
-            <b-alert v-if="isSuccess" show dismissible fade variant="success">Created</b-alert>
         </b-form>
     </div>
 </template>
@@ -28,8 +26,6 @@ export default {
             body: '',
             selected: [],
             tags: [],
-            createErrors: [],
-            isSuccess: false
         }
     },
 
@@ -47,8 +43,16 @@ export default {
                 }).then(response => {
                     this.items = response.data
                     this.err = ''
-                    this.isSuccess = true
-                }).catch(err => { this.createErrors.push(err.message) })
+                    this.$bvToast.toast('Heaading created', {
+                        title: 'Success',
+                        variant: 'success'
+                    })
+                }).catch(err => { 
+                    this.$bvToast.toast(err.message, {
+                        title: 'Error',
+                        variant: 'danger'
+                    })
+                })
             }
         },
         validData () {
@@ -63,8 +67,12 @@ export default {
         getJSON () {
             HTTP.get('/tags/').then(response => {
                 this.tags = response.data
-                console.log(response.data)
-            }).catch(err => { this.createErrors.push(err.message) })
+            }).catch(err => { 
+                this.$bvToast.toast(err.message, {
+                        title: 'Error',
+                        variant: 'danger'
+                    })
+            })
         }
     }
 }

@@ -1,12 +1,9 @@
 <template>
   <div class="home">
-    <form>
       <TopHeads :items="items" v-if="items.length > 0"/>
       <div class="text-center" v-if="err === ''">
         <b-spinner/>
       </div>
-      <div class="alert alert-danger" role="alert" v-if="err !== ''">{{ err }}</div>
-    </form>
   </div>
 </template>
 
@@ -36,8 +33,13 @@ export default {
     getJSON () {
       HTTP.get('/headings/').then(response => {
         this.items = response.data
-        console.log(response.data)
-      }).catch(err => { this.err = err.message })
+      }).catch(err => { 
+        this.err = err.message
+        this.$bvToast.toast(err.message, {
+          title: 'Error',
+          variant: 'danger'
+        })
+      })
       function compare (a, b) {
         if (a.views < b.views) {
           return -1;
