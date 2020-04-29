@@ -8,9 +8,11 @@
         <div v-for="tag in heading.tags" :key="tag">
           <b-badge>{{ tag }}</b-badge>
         </div>
-        <b-button v-on:click="visibleAnswer=true" variant="primary">Answer</b-button>
-        <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
-        <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
+        <template v-if="isLoggedIn">
+          <b-button v-on:click="visibleAnswer=true" variant="primary">Answer</b-button>
+          <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
+          <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
+        </template>
       </b-card>
 
       <template v-if="visibleEdit">
@@ -75,6 +77,12 @@ export default {
   name: "Heading",
   components: {
     Messages
+  },
+
+  computed: {
+    isLoggedIn: function() {
+      return this.$store.getters.isLoggedIn;
+    }
   },
 
   data() {
