@@ -1,19 +1,24 @@
 <template>
   <div>
-    <b-card
-      :header="[item.uuid, item.parent]"
-      :footer="[item.created, item.user_uuid]"
-      :img-scr="item.image"
-    >
-      <b-card-text>{{ item.body }}</b-card-text>
-      <b-card-text>{{ item.file }}</b-card-text>
-      <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
-      <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
-      <b-button v-on:click="visibleReply=true" variant="danger">Reply</b-button>
-      <b-card-group flush :visible="visibleEdit">
-        <b-card-group-item>
-          <form class="edit">
-            <h4>Edit message</h4>
+    <b-card-group flush>
+      <b-card
+        :header="item.parent"
+        :footer="[item.created, item.user_uuid]"
+        :img-scr="item.image"
+      >
+        <b-card-text>{{ item.body }}</b-card-text>
+        <b-card-text>{{ item.file }}</b-card-text>
+        <template v-if="isLoggedIn">
+          <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
+          <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
+          <b-button v-on:click="visibleReply=true" variant="danger">Reply</b-button>
+        </template>
+      </b-card>
+
+      <template v-if="visibleEdit">
+        <b-card>
+          <b-card-title>Edit message</b-card-title>
+          <form>
             <b-form-group id="inputBodyGroup" label="Main text" label-for="inputBody">
               <b-form-input id="inputBody" v-model="item.body" />
             </b-form-group>
@@ -33,12 +38,13 @@
             </b-form-group>
             <b-button type="submit" variant="primary" v-on:click="editData()">Save</b-button>
           </form>
-        </b-card-group-item>
-      </b-card-group>
-      <b-card-group flush :visible="visibleReply">
-        <b-card-group-item>
+        </b-card>
+      </template>
+
+      <template v-if="visibleReply">
+        <b-card>
+          <b-card-title>Reply</b-card-title>
           <form>
-            <h4>Edit message</h4>
             <b-form-group id="inputBodyGroup" label="Main text" label-for="inputBody">
               <b-form-input id="inputBody" v-model="new_item.body" />
             </b-form-group>
@@ -58,9 +64,9 @@
             </b-form-group>
             <b-button type="submit" variant="primary" v-on:click="editData()">Save</b-button>
           </form>
-        </b-card-group-item>
-      </b-card-group>
-    </b-card>
+        </b-card>
+      </template>
+    </b-card-group>
   </div>
 </template>
 
@@ -71,6 +77,12 @@ export default {
   props: {
     item: {
       type: Object
+    }
+  },
+
+  computed: {
+    isLoggedIn: function() {
+      return this.$store.getters.isLoggedIn;
     }
   },
 

@@ -55,6 +55,7 @@
                   id="inputImage"
                   v-model="new_message.image"
                   placeholder="Choose a image or drop it here..."
+                  accept="image/*"
                 />
               </b-form-group>
               <b-button type="submit" variant="primary" v-on:click="createMessage()">Save</b-button>
@@ -111,7 +112,6 @@ export default {
         headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
       })
         .then(response => {
-          console.log(response.data);
           this.heading = response.data;
           this.getMessages();
         })
@@ -193,6 +193,32 @@ export default {
       })
         .then(response => {
           this.tags = response.data;
+        })
+        .catch(err => {
+          this.$bvToast.toast(err.message, {
+            title: "Error",
+            variant: "danger"
+          });
+        });
+    },
+    createMessage() {
+      let data = new FormData()
+      data.append('body', this.new_message.body)
+      data.append('user_uuid', this.$store.getters.userUUID)
+      data.append('head_uuid', this.head_uuid)
+      data.append('file', this.new_message.file)
+      data.append('image', this.new_message.image)
+      Axios.post("http://localhost:8082/messages/", data, {
+        headers: {
+          Authorization: `Bearer ${this.$store.getters.getToken}`,
+          "Content-Type": "multipart/form-data"
+        }
+      })
+        .then(() => {
+          this.$bvToast.toast("Message created", {
+            title: "Success",
+            variant: "success"
+          });
         })
         .catch(err => {
           this.$bvToast.toast(err.message, {
