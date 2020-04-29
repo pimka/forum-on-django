@@ -99,18 +99,18 @@ def token(id, secret):
     return response.json(), response.status_code
 
 @TokenAuthorize(STORAGE, token, ID, SECRET, TOKEN_LABEL)
-def send_credentials(credentials):
+def send_credentials(credentials, headers={}):
     try:
-        response = requests.post(URLS['send-credentials'], credentials)
+        response = requests.post(URLS['send-credentials'], credentials, headers=headers)
     except requests.RequestException as err:
         return ({ERRORS_FIELD: str(err)}, 503)
 
     return response.json(), response.status_code
 
 @TokenAuthorize(STORAGE, token, ID, SECRET, TOKEN_LABEL)
-def update_credentials(uuid, credentials):
+def update_credentials(uuid, credentials, headers={}):
     try:
-        response = requests.put(URLS['update-credentials'].format(uuid=uuid), credentials)
+        response = requests.put(URLS['update-credentials'].format(uuid=uuid), credentials, headers=headers)
     except requests.RequestException as err:
         return ({ERRORS_FIELD: str(err)}, 503)
 

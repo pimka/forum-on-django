@@ -42,7 +42,7 @@ class UserSerializer(serializers.ModelSerializer):
         if validated_data.get('is_staff'):
             is_staff = validated_data.pop('is_staff')
             credentials['is_staff'] = is_staff
-            instance.is_moderate = is_staff
+            instance.is_staff = is_staff
 
         if validated_data.get('password'):
             password = validated_data.pop('password')

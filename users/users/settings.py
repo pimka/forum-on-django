@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'api',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,12 +39,17 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'api',
+    'corsheaders'
 ]
+
+AUTH_USER_MODEL = 'api.User'
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -121,12 +127,11 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-AUTH_USER_MODEL = 'api.User'
-
 URLS = {
-    'auth-token': 'http://localhost:8080/tokens',
-    'send-credentials': 'http://localhost:8080/users',
-    'update-credentials' : 'http://localhost:8080/users/{uuid}'
+    'auth-token': 'http://localhost:8080/tokens/',
+    'send-credentials': 'http://localhost:8080/user/add/',
+    'update-credentials' : 'http://localhost:8080/user/{uuid}/',
+    'login': 'http://localhost:8080/user/login/'
 }
 
 AUTHENTICATION_BACKENDS = [
