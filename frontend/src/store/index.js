@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import { HTTP } from '../api/common'
+import { HTTPAuth } from '../api/common'
 
 Vue.use(Vuex)
 
@@ -12,28 +12,34 @@ export default new Vuex.Store({
     user: {},
     refresh_token: localStorage.getItem('refresh_token') || '',
     token_type: '',
-    access_token: localStorage.getItem('access_token') || ''
+    access_token: localStorage.getItem('access_token') || '',
+    user_uuid: '',
+    is_staff: false
   },
   mutations: {
-    auth_request (state) {
+    auth_request(state) {
       state.status = 'loading'
     },
-    auth_success (state, token, user) {
+    auth_success(state, payload) {
       state.status = 'success'
-      state.token = token
-      state.user = user
+      state.token = payload.token
+      state.user = payload.user
+      state.user_uuid = payload.uuid
+      state.is_staff = payload.is_staff
     },
-    auth_error (state) {
+    auth_error(state) {
       state.status = 'error'
     },
-    logout (state) {
+    logout(state) {
       state.status = ''
       state.token = ''
       state.access_token = ''
       state.token_type = ''
       state.refresh_token = ''
+      state.user_uuid = ''
+      state.is_staff = false
     },
-    oauth_success (state, payload) {
+    oauth_success(state, payload) {
       state.status = 'success'
       state.access_token = payload.a_token
       state.token_type = payload.type
@@ -41,27 +47,30 @@ export default new Vuex.Store({
     }
   },
   actions: {
-    login ({ commit }, user) {
+    login({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request')
-        HTTP.post('/auth/', user)
+        HTTPAuth.post('user/login/', user)
           .then(resp => {
             const token = resp.data.token
             const user = resp.data.user
-            localStorage.setItem('token', token)
+            const uuid = resp.data.uuid
+            const is_staff = resp.data.is_superuser
+            console.log(this.state.uuid)
             axios.defaults.headers.common['Authorization'] = token
-            commit('auth_success', token, user)
+            commit('auth_success', {'token':token, 'user':user, 'uuid':uuid, 'is_staff':is_staff})
             resolve(resp)
             console.log('success')
           })
           .catch(err => {
             commit('auth_error')
             localStorage.removeItem('token')
+            console.log('auth_with_errors')
             reject(err)
           })
       })
     },
-    oauth_login ({ commit }, data) {
+    oauth_login({ commit }, data) {
       const Atoken = data.access_token
       const Ttype = data.token_type
       const Rtoken = data.refresh_token
@@ -70,13 +79,18 @@ export default new Vuex.Store({
       commit('oauth_success', tokens)
       axios.defaults.headers.common['Authorization'] = Ttype + ' ' + Atoken
     },
-    logout ({ commit }) {
+    logout({ commit }) {
       return new Promise((resolve, reject) => {
-        commit('logout')
-        localStorage.removeItem('token')
-        localStorage.removeItem('access_token')
-        delete axios.defaults.headers.common['Authorization']
-        resolve()
+        try {
+          commit('logout')
+          localStorage.removeItem('token')
+          localStorage.removeItem('access_token')
+          delete axios.defaults.headers.common['Authorization']
+          resolve()
+        }
+        catch (err) {
+          reject(err)
+        }
       })
     }
   },
@@ -84,6 +98,9 @@ export default new Vuex.Store({
   },
   getters: {
     isLoggedIn: state => !!state.token || !!state.access_token,
-    authStatus: state => state.status
+    authStatus: state => state.status,
+    userUUID: state => state.user_uuid,
+    isStaff: state => state.is_staff,
+    getToken: state => state.token
   }
 })

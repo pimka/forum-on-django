@@ -4,20 +4,18 @@
         <b-sidebar id="sidebar-backdrop" title="Headings" bg-variant="dark" text-variant="light" backdrop shadow>
             <div class="p-3">
                 <router-link to="/new-heading/">Create Heading</router-link>
-                <ul>
-                    <div v-for="head of heads" :key="head">
-                        <router-link :to="{ name: 'concrete_heading', params: { uuid : head.uuid }}">
+                    <div v-for="head in heads" :key="head">
+                        <router-link :to="{ name: 'concrete_heading', params: { head_uuid : head.uuid }}">
                             {{ head.header }}
                         </router-link>
                     </div>
-                </ul>
             </div>
         </b-sidebar>
     </div>
 </template>
 
 <script>
-import { HTTP } from '../api/common'
+import { HTTPHeading } from '../api/common'
 
 export default {
     created () {
@@ -32,8 +30,8 @@ export default {
 
   methods: {
     getHeads () {
-      HTTP.get('/headings/').then(response => {
-        this.items = response.data
+      HTTPHeading.get('/headings/').then(response => {
+        this.heads = response.data
         console.log(response.data)
       }).catch(err => { 
         this.$bvToast.toast(err.message, {

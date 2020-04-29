@@ -1,6 +1,6 @@
 <template>
     <div>
-        <form @submit.prevent="register">
+        <form>
             <h3>Sign Up</h3>
             <b-form-group id="inputUsernameGroup" label="Username" label-for="inputUsername">
                 <b-form-input id="inputUsername" v-model="username" placeholder="Enter your name"/>
@@ -8,23 +8,19 @@
             <b-form-group id="inputPasswordGroup" label="Password" label-for="inputPassword">
                 <b-form-input id="inputPassword" v-model="password" type="password" placeholder="Enter your password"/>
             </b-form-group>
-            <b-form-group id="inputEmailGroup" label="Email" label-for="inputEmail">
-                <b-form-input id="inputEmail" v-model="email" type="email" placeholder="Enter your email"/>
-            </b-form-group>
             <b-button type="submit" variant="primary" v-on:click="register()">Create Account</b-button>
         </form>
     </div>
 </template>
 
 <script>
-import { HTTP } from '../api/common'
+import { HTTPUser } from '../api/common'
 
 export default {
     data () {
         return {
             username: null,
             password: null,
-            email: null,
             isSuccess: false
         }
     },
@@ -49,10 +45,9 @@ export default {
                 })
         },
         register: function () {
-            HTTP.post('/user/', {
+            HTTPUser.post('/user/', {
                 'username': this.username,
-                'password': this.password,
-                'email': this.email
+                'password': this.password
             }).then(response => {
                 this.items = response.data
                 this.isSuccess = true

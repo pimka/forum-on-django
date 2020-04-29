@@ -1,46 +1,48 @@
 <template>
   <div class="home">
-      <TopHeads :items="items" v-if="items.length > 0"/>
-      <div class="text-center" v-if="err === ''">
-        <b-spinner/>
-      </div>
+    <TopHeads :items="items" v-if="items.length > 0" />
+    <div class="text-center" v-if="err === ''">
+      <b-spinner />
+    </div>
   </div>
 </template>
 
 <script>
 // @ is an alias to /src
-import { HTTP } from '../api/common'
-import TopHeads from '../components/TopSearchHeadTable.vue'
+import { HTTPHeading } from "../api/common";
+import TopHeads from "../components/TopSearchHeadTable.vue";
 
 export default {
-  name: 'Home',
+  name: "Home",
   components: {
     TopHeads
   },
 
-  created () {
-    this.getJSON()
+  created() {
+    this.getJSON();
   },
 
-  data () {
+  data() {
     return {
       items: [],
-      err: ''
-    }
+      err: ""
+    };
   },
 
   methods: {
-    getJSON () {
-      HTTP.get('/headings/').then(response => {
-        this.items = response.data
-      }).catch(err => { 
-        this.err = err.message
-        this.$bvToast.toast(err.message, {
-          title: 'Error',
-          variant: 'danger'
+    getJSON() {
+      HTTPHeading.get("/headings/")
+        .then(response => {
+          this.items = response.data;
         })
-      })
-      function compare (a, b) {
+        .catch(err => {
+          this.err = err.message;
+          this.$bvToast.toast(err.message, {
+            title: "Error",
+            variant: "danger"
+          });
+        });
+      function compare(a, b) {
         if (a.views < b.views) {
           return -1;
         }
@@ -49,9 +51,9 @@ export default {
         }
         return 0;
       }
-      this.items.sort(compare)
-      this.items = this.items.slice(10)
+      this.items.sort(compare);
+      this.items = this.items.slice(10);
     }
   }
-}
+};
 </script>
