@@ -15,11 +15,11 @@ class CustomTokenAuth(TokenAuthentication):
 
     def authenticate_credentials(self, key):
         try:
-            token = self.model.objects.get(pk=key)
+            token = self.model.objects.get(token=key)
         except self.model.DoesNotExist:
             raise AuthenticationFailed('Invalid token')
 
-        delta_time = timezone.now() - token.created()
+        delta_time = timezone.now() - token.created
         delta_time = timedelta(minutes=30) - delta_time
 
         if delta_time < timedelta():

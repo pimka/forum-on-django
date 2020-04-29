@@ -6,7 +6,7 @@ from django.db import models
 
 
 class UserCredentialsModel(AbstractUser):
-    uuid = models.UUIDField(unique=True, null=False, editable=False)
+    uuid = models.UUIDField(unique=True, null=True)
 
 class TokenBaseModel(models.Model):
     class Meta:
@@ -17,7 +17,7 @@ class TokenBaseModel(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.token:
-            self.token = binascii.hexlify(os.urandom(20)).decode(0)
+            self.token = binascii.hexlify(os.urandom(20)).decode()
         return super().save(*args, **kwargs)
 
 class UserToken(TokenBaseModel):

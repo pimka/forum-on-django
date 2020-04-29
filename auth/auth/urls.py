@@ -22,7 +22,7 @@ from api.views import (AuthTokenView, ServicesTokenView, UsersAdvancedView,
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('token/', ServicesTokenView.as_view()),
+    path('tokens/', ServicesTokenView.as_view()),
     path('user/auth/', AuthTokenView.as_view()),
     path('user/add/', UsersBaseView.as_view()),
     path('user/login/', UsersLoginView.as_view()),

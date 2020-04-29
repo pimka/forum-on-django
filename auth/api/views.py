@@ -16,7 +16,6 @@ class BaseView(APIView):
     model = None
     serializer = None
     permission_classes = (IsAuth, )
-    authentication_classes = None
 
     def exception(self, request, message):
         self.logger.exception(self.__format.format(
@@ -74,7 +73,7 @@ class AuthTokenView(BaseView):
 
     def get(self, request):
         self.info(request, f'check user {request.auth}')
-        return Response(data={'uuid':request.user.uuid, 'is_staff':request.user.is_staff}, status=status.HTTP_200_OK)
+        return Response(data={'uuid':request.auth.user.uuid, 'is_staff':request.auth.user.is_staff}, status=status.HTTP_200_OK)
 
 class UsersBaseView(BaseView):
     model = UserCredentialsModel
@@ -85,7 +84,7 @@ class UsersBaseView(BaseView):
         serializer = self.serializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status.HTTP_200_OK)
+            return Response(serializer.data, status.HTTP_201_CREATED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

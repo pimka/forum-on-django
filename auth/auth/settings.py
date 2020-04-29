@@ -39,11 +39,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'api',
+    'corsheaders'
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -129,16 +133,16 @@ SERVICES_CREDENTIALS = {
         'secret' : 'users8081'
     },
     'messages' : {
-        'id' : '',
-        'secret' : ''
+        'id' : 'messages',
+        'secret' : 'messages8082'
     },
     'headings' : {
-        'id' : '',
-        'secret' : ''
+        'id' : 'headings',
+        'secret' : 'headings8083'
     },
     'statistics' : {
-        'id' : '',
-        'secret' : ''
+        'id' : 'statistic',
+        'secret' : 'statistic8084'
     }
 }
 
