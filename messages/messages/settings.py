@@ -15,6 +15,8 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -129,7 +131,8 @@ AUTHENTICATION_BACKENDS = [
 CORS_ORIGIN_ALLOW_ALL = True
 
 URLS = {
-    'auth-token': 'http://localhost:8080/tokens/',
+    'auth-token': 'http://localhost:8080/user/auth/',
     'send-credentials': 'http://localhost:8080/users/',
-    'update-credentials' : 'http://localhost:8080/users/{uuid}/'
+    'update-credentials' : 'http://localhost:8080/users/{uuid}/',
+    'login': 'http://localhost:8080/user/login/'
 }

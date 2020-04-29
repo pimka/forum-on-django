@@ -52,15 +52,18 @@ class MessageBaseOperations(BaseView):
             messages = MessageModel.objects.all()
         
         serializer = MessageSerializer(data=messages, many=True)
-        self.send_task('GET MESSAGES', request.auth.get('uuid'), after=serializer.data)
+        serializer.is_valid()
+        user_uuid = ''#request.auth.get('uuid')
+        self.send_task('GET MESSAGES', user_uuid, after=serializer.data)
         return Response(serializer.data)
 
     def post(self, request):
         self.info(request, 'adding new message')
         serializer = MessageSerializer(data=request.data)
+        user_uuid = ''#request.auth.get('uuid')
         if serializer.is_valid():
             serializer.save()
-            self.send_task('POST MESSAGE', request.auth.get('uuid'), after=serializer.data)
+            self.send_task('POST MESSAGE', user_uuid, after=serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -88,11 +91,12 @@ class MessageAdvancedOperations(BaseView):
         self.info(request, f'changing message {uuid}')
         message = self.get_object(uuid)
         old_data = MessageSerializer(message)
-        serializer = MessageSerializer(message, request.data)
+        serializer = MessageSerializer(message, request.data, partial=True)
+        user_uuid = ''#request.auth.get('uuid'),
 
         if serializer.is_valid():
             serializer.save()
-            self.send_task('PATCH MESSAGE', request.auth.get('uuid'), old_data.data, serializer.data)
+            self.send_task('PATCH MESSAGE', user_uuid, old_data.data, serializer.data)
             return Response(data=serializer.data, status=status.HTTP_202_ACCEPTED)
 
         self.exception(request, f'Invalid data ({serializer.errors})')

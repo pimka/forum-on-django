@@ -1,9 +1,8 @@
 import requests
 from django.conf import settings
 from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-
-from .models import User
 
 ERRORS_FIELD = getattr(settings, 'ERRORS_FIELD', 'error')
 __default_urls = {

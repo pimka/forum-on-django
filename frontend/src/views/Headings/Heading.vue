@@ -126,7 +126,7 @@ export default {
     editData() {
       if (this.validData()) {
         this.visibleEdit = false;
-        Axios.put(
+        Axios.patch(
           `http://localhost:8083/headings/${this.head_uuid}/`,
           this.heading,
           {
@@ -175,7 +175,8 @@ export default {
     },
     getMessages() {
       Axios.get(`http://localhost:8082/messages/`, {
-        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` },
+        params: { heading: this.$route.params.head_uuid }
       })
         .then(response => {
           this.messages = response.data;
