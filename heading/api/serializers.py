@@ -13,4 +13,4 @@ class HeadingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HeadingModel
-        fields = ['uuid', 'user_uuid', 'tags', 'header', 'body', 'views']
+        fields = ['uuid', 'user_uuid', 'tags', 'header', 'body', 'views', 'created']
