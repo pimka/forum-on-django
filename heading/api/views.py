@@ -41,17 +41,21 @@ class BaseView(APIView):
             message = message
         ))
 
-class TagBaseOperations(BaseView):
-    authentication_classes = [TokenAuth]
-    permission_classes = [IsAuthenticate]
+class GetTagsView(BaseView):
 
     def get(self, request):
         self.info(request, 'getting all tags')
         tags = TagModel.objects.all()
-        serializer = TagSerializer(data=tags, many=True)
+        serializer = TagSerializer(instance=tags, many=True)
 
-        self.send_task('GET TAGS', request.auth.get('uuid'), after=serializer.data)
+        user_uuid = ''#request.user.auth.get('uuid')
+
+        self.send_task('GET TAGS', user_uuid, after=serializer.data)
         return Response(serializer.data)
+
+class TagBaseOperations(BaseView):
+    authentication_classes = [TokenAuth]
+    permission_classes = [IsAuthenticate]
 
     def post(self, request):
         self.info(request, 'adding new tag')
@@ -64,21 +68,29 @@ class TagBaseOperations(BaseView):
         self.exception(request, f'Invalid data ({serializer.errors})')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class HeadingBaseOperations(BaseView):
+class GetHeadingsView(BaseView):
     def get(self, request):
         self.info(request, 'getting all headings')
-        heads = HeadingModel.object.all()
+        heads = HeadingModel.objects.all()
         serializer = HeadingSerializer(data=heads, many=True)
+        serializer.is_valid()
 
-        self.send_task('GET HEADINGS', request.auth.get('uuid'), after=serializer.data)
+        user_uuid = ''#request.auth.get('uuid')
+
+        self.send_task('GET HEADINGS', user_uuid, after=serializer.data)
         return Response(serializer.data)
+
+class HeadingBaseOperations(BaseView):
+    authentication_classes = [TokenAuth]
+    permission_classes = [IsAuthenticate]
 
     def post(self, request):
         self.info(request, 'adding new heading')
         serializer = HeadingSerializer(data=request.data)
+        user_uuid = ''#request.auth.get('uuid')
         if serializer.is_valid():
             serializer.save()
-            self.send_task('POST HEADING', request.auth.get('uuid'), after=serializer.data)
+            self.send_task('POST HEADING', user_uuid, after=serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         
         self.exception(request, f'Invalid data ({serializer.errors})')
@@ -125,10 +137,7 @@ class TagAdvancedOperations(BaseView):
         self.send_task('DELETE TAG', request.auth.get('uuid'), before=old_data.data)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class HeadingAdvancedOperations(BaseView):
-    authentication_classes = [TokenAuth]
-    permission_classes = [IsAuthenticate, IsOwner]
-
+class GetConcreteHeadingView(BaseView):
     def get_object(self, uuid):
         try:
             return HeadingModel.objects.get(uuid=uuid)
@@ -140,10 +149,21 @@ class HeadingAdvancedOperations(BaseView):
         head = self.get_object(uuid)
         head.views += 1
         head.save()
+        user_uuid = ''#request.auth.get('uuid')
 
         serializer = HeadingSerializer(head)
-        self.send_task('GET HEADING', request.auth.get('uuid'), after=serializer.data)
+        self.send_task('GET HEADING', user_uuid, after=serializer.data)
         return Response(serializer.data)
+
+class HeadingAdvancedOperations(BaseView):
+    authentication_classes = [TokenAuth]
+    permission_classes = [IsAuthenticate, IsOwner]
+
+    def get_object(self, uuid):
+        try:
+            return HeadingModel.objects.get(uuid=uuid)
+        except HeadingModel.DoesNotExist:
+            raise Http404
 
     def patch(self, request, uuid):
         self.info(request, f'changing heading {uuid}')

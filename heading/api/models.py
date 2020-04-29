@@ -13,5 +13,5 @@ class HeadingModel(models.Model):
     tags = models.ManyToManyField(TagModel)
     header = models.CharField(max_length=250, null=False)
     body = models.TextField(null=False)
-    views = models.PositiveIntegerField()
+    views = models.PositiveIntegerField(default=0)
     created = models.DateTimeField(auto_now_add=True)

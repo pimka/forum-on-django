@@ -7,7 +7,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
-from ..heading.settings import URLS
+from heading.settings import URLS
 
 ERRORS_FIELD = getattr(settings, 'ERRORS_FIELD', 'error')
 STORAGE = StrictRedis(decode_responses=True)
@@ -20,7 +20,7 @@ class TokenAuth(TokenAuthentication):
     keyword = 'Bearer'
     
     def authenticate_credentials(self, key):
-        data, st = self.authenticate(key)
+        data, st = self.auth(key)
 
         if st != 200:
             msg = data.get('error', 'Invalid token')
@@ -29,13 +29,16 @@ class TokenAuth(TokenAuthentication):
         data['token'] = key
         return (None, data)
 
-    def authenticate(self, token):
+    def auth(self, token):
         try:
-            response = requests.get(URLS['authenticate'], headers={'Authentication': token})
+            response = requests.get(URLS['auth-token'], headers={'Authorization': f'{self.keyword} {token}'})
         except requests.RequestException as err:
             return { ERRORS_FIELD : str(err)}, 503
 
         return response.json(), response.status_code
+
+    def authenticate(self, request):
+        return super().authenticate(request)
 
 class TokenAuthorize:
     def __init__(self, storage, new, id, secret, token_label='<service>-token', token_type='Bearer'):

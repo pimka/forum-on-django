@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders'
+    'corsheaders',
     'rest_framework',
     'api.apps.ApiConfig'
 ]
@@ -124,9 +124,10 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 URLS = {
-    'auth-token': 'http://localhost:8080/tokens',
-    'send-credentials': 'http://localhost:8080/users',
-    'update-credentials' : 'http://localhost:8080/users/{uuid}'
+    'auth-token': 'http://localhost:8080/user/auth/',
+    'send-credentials': 'http://localhost:8080/users/',
+    'update-credentials' : 'http://localhost:8080/users/{uuid}/',
+    'login': 'http://localhost:8080/user/login/'
 }
 
 AUTHENTICATION_BACKENDS = [
