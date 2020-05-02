@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from .models import HeadingModel, TagModel
+import json
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -9,7 +10,7 @@ class TagSerializer(serializers.ModelSerializer):
         fields = ['uuid', 'name']
 
 class HeadingSerializer(serializers.ModelSerializer):
-    tags = TagSerializer(read_only=True, many=True)
+    tags = serializers.SlugRelatedField(many=True,slug_field='uuid', queryset=TagModel.objects.all())
 
     class Meta:
         model = HeadingModel

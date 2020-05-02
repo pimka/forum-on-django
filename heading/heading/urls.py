@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('tags/', views.GetTagsView.as_view()),
     path('tags_add/', views.TagBaseOperations.as_view()),
+    path('get_tags/<uuid:uuid>/', views.GetTagView.as_view()),
     path('tags/<uuid:uuid>/', views.TagAdvancedOperations.as_view()),
     path('headings/', views.GetHeadingsView.as_view()),
     path('headings_add/', views.HeadingBaseOperations.as_view()),
