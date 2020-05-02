@@ -53,14 +53,14 @@ class MessageBaseOperations(BaseView):
         
         serializer = MessageSerializer(data=messages, many=True)
         serializer.is_valid()
-        user_uuid = ''#request.auth.get('uuid')
+        user_uuid = request.auth.get('uuid') if request.auth else ''
         self.send_task('GET MESSAGES', user_uuid, after=serializer.data)
         return Response(serializer.data)
 
     def post(self, request):
         self.info(request, 'adding new message')
         serializer = MessageSerializer(data=request.data)
-        user_uuid = ''#request.auth.get('uuid')
+        user_uuid = request.auth.get('uuid') if request.auth else ''
         if serializer.is_valid():
             serializer.save()
             self.send_task('POST MESSAGE', user_uuid, after=serializer.data)
@@ -83,8 +83,9 @@ class MessageAdvancedOperations(BaseView):
         self.info(request, f'get message {uuid}')
         message = self.get_object(uuid)
         serializer = MessageSerializer(message)
+        user_uuid = request.auth.get('uuid') if request.auth else ''
 
-        self.send_task('GET MESSAGE', request.auth.get('uuid'), after=serializer.data)
+        self.send_task('GET MESSAGE', user_uuid, after=serializer.data)
         return Response(serializer.data)
 
     def patch(self, request, uuid):
@@ -92,7 +93,7 @@ class MessageAdvancedOperations(BaseView):
         message = self.get_object(uuid)
         old_data = MessageSerializer(message)
         serializer = MessageSerializer(message, request.data, partial=True)
-        user_uuid = ''#request.auth.get('uuid'),
+        user_uuid = request.auth.get('uuid') if request.auth else ''
 
         if serializer.is_valid():
             serializer.save()
@@ -107,6 +108,7 @@ class MessageAdvancedOperations(BaseView):
         message = self.get_object(uuid)
         old_data = MessageSerializer(message)
         message.delete()
+        user_uuid = request.auth.get('uuid') if request.auth else ''
 
-        self.send_task('DELETE MESSAGE', request.auth.get('uuid'), before=old_data.data)
+        self.send_task('DELETE MESSAGE', user_uuid, before=old_data.data)
         return Response(status=status.HTTP_204_NO_CONTENT)
