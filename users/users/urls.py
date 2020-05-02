@@ -20,6 +20,7 @@ from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('get_user/<uuid:uuid>/', views.GetUserView.as_view()),
     path('user/', views.UserBaseOperations.as_view()),
     path('user/<uuid:uuid>/', views.UserAdvancedOperations.as_view())
 ]

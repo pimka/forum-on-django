@@ -44,9 +44,7 @@ class UserBaseOperations(BaseView):
         self.exception(request, f'Invalid data ({serializer.errors})')
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class UserAdvancedOperations(BaseView):
-    permission_classes = [IsOwner, ]
-
+class GetUserView(BaseView):
     def get(self, request, uuid, *args, **kwargs):
         try:
             self.info(request, f'Get user {uuid}')
@@ -59,6 +57,9 @@ class UserAdvancedOperations(BaseView):
 
         serializer = UserSerializer(user)
         return Response(serializer.data)
+
+class UserAdvancedOperations(BaseView):
+    permission_classes = [IsOwner, ]
 
     def patch(self, request, uuid):
         try:
