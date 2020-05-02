@@ -66,7 +66,7 @@ class UsersLoginView(BaseView):
     def post(self, request):
         self.info(request, f'{request.user.username} request for token')
         token, created = self.model.objects.get_or_create(user=request.user)
-        return Response({ 'token' : token.token, 'uuid':request.user.uuid, 'is_superuser':request.user.is_superuser }, status.HTTP_200_OK)
+        return Response({ 'token' : token.token, 'uuid':request.user.uuid, 'is_superuser':request.user.is_superuser, 'is_staff':request.user.is_staff }, status.HTTP_200_OK)
 
 class AuthTokenView(BaseView):
     authentication_classes = (AuthTokenAuth, )
