@@ -1,6 +1,6 @@
 <template>
   <div>
-    <form class="login">
+    <b-form>
       <h3>Sign In</h3>
       <b-form-group id="inputUsernameGroup" label="Username" label-for="inputUsername">
         <b-form-input id="inputUsername" v-model="username" placeholder="Enter your name" />
@@ -14,7 +14,7 @@
         />
       </b-form-group>
       <b-button type="submit" variant="primary" v-on:click="login()">Sign In</b-button>
-    </form>
+    </b-form>
   </div>
 </template>
 

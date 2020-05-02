@@ -5,6 +5,9 @@ import Add from '../views/Headings/Add.vue'
 import Heading from '../views/Headings/Heading.vue'
 import Login from '../views/Login.vue'
 import Register from '../views/Register.vue'
+import Tags from '../views/Tags.vue'
+import store from '@/store'
+import SearchHeadings from '../views/Headings/SearchHeadings.vue'
 
 Vue.use(VueRouter)
 
@@ -17,7 +20,10 @@ Vue.use(VueRouter)
   {
     path: '/new-heading/',
     name: 'new-heading',
-    component: Add
+    component: Add,
+    meta: {
+      Authorization: true
+    }
   },
   {
     path: '/heading/:head_uuid/',
@@ -33,11 +39,46 @@ Vue.use(VueRouter)
     path: '/register/',
     name: 'register',
     component: Register
+  },
+  {
+    path: '/tags/',
+    name: 'tags',
+    component: Tags,
+    meta: {
+      Administer: true
+    }
+  },
+  {
+    path: '/search/',
+    name: 'search',
+    component: SearchHeadings
   }
 ]
 
 const router = new VueRouter({
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.Authorization)) {
+    if (store.getters.isLoggedIn) {
+      next()
+      return
+    }
+    next('/login/')
+  } else {
+    next()
+  }
+
+  if (to.matched.some(record => record.meta.Authorization)) {
+    if (store.getters.isStaff) {
+      next()
+      return
+    }
+    next('/')
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -13,9 +13,11 @@
         <div class="p-3">
           <router-link to="/new-heading/">Create Heading</router-link>
           <div v-for="head in heads" :key="head">
-            <router-link
-              :to="{ name: 'concrete_heading', params: { head_uuid : head.uuid }}"
-            >{{ head.header }}</router-link>
+            <template v-if="head.user_uuid == userUUID">
+              <router-link
+                :to="{ name: 'concrete_heading', params: { head_uuid : head.uuid }}"
+              >{{ head.header }}</router-link>
+            </template>
           </div>
         </div>
       </b-sidebar>
@@ -34,9 +36,12 @@ export default {
   computed: {
     isLoggedIn: function() {
       return this.$store.getters.isLoggedIn;
+    },
+    userUUID: function() {
+      return this.$store.getters.userUUID
     }
   },
-  
+
   data() {
     return {
       heads: []
@@ -48,7 +53,6 @@ export default {
       HTTPHeading.get("/headings/")
         .then(response => {
           this.heads = response.data;
-          console.log(response.data);
         })
         .catch(err => {
           this.$bvToast.toast(err.message, {

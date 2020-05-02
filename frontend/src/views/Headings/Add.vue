@@ -36,23 +36,16 @@ export default {
   methods: {
     sendData() {
       if (this.validData()) {
-        var selectedJSON = [];
-        for (let index = 0; index < this.selected.length; index++) {
-          const element = this.selected[index];
-          selectedJSON.push({ name: element.text, uuid: element.value });
-        }
-        Axios.post(
-          "http://localhost:8083/headings_add/",
-          {
-            header: this.head,
-            body: this.body,
-            tags: selectedJSON,
-            user_uuid: this.$store.getters.userUUID
-          },
-          {
-            headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+        Axios.post("http://localhost:8083/headings_add/", {
+          'header':this.head,
+          'body':this.body,
+          'user_uuid':this.$store.getters.userUUID,
+          'tags':this.selected
+        }, {
+          headers: {
+            Authorization: `Bearer ${this.$store.getters.getToken}`
           }
-        )
+        })
           .then(response => {
             this.items = response.data;
             this.err = "";

@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h3>Top headings</h3>
-    <b-table :fields="fields" :items="items" head-variant="light" :striped="true">
+    <h3>All Headings</h3>
+    <b-table id="headsTable" :fields="fields" :items="items" head-variant="light" :striped="true">
       <template v-slot:cell(header)="{value, item}">
         <router-link :to="{name:'concrete_heading', params:{head_uuid:item.uuid}}">{{item.header}}</router-link>
       </template>

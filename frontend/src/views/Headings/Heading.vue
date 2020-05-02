@@ -4,15 +4,28 @@
       <b-card>
         <b-card-title>{{ heading.header }}</b-card-title>
         <b-card-text>{{ heading.body }}</b-card-text>
-        <b-card-footer>Views: {{ heading.views }}</b-card-footer>
-        <div v-for="tag in heading.tags" :key="tag">
-          <b-badge>{{ tag }}</b-badge>
-        </div>
+        <template>
+          <b-badge v-for="tag in head_tags" :key="tag">{{ tag }}</b-badge>
+        </template>
+        <br/>
         <template v-if="isLoggedIn">
           <b-button v-on:click="visibleAnswer=true" variant="primary">Answer</b-button>
+        </template>
+        <template
+          v-if="isLoggedIn & (this.$store.getters.userUUID==heading.user_uuid || this.$store.getters.isStaff)"
+        >
           <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
           <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
         </template>
+        <b-card-footer>
+          <a>
+            Views: {{ heading.views }}
+            <br />
+            Creator: {{ author }}
+            <br />
+            Created: {{ formatDate(heading.created) }}
+          </a>
+        </b-card-footer>
       </b-card>
 
       <template v-if="visibleEdit">
@@ -21,13 +34,17 @@
           <b-card-text>
             <b-form>
               <b-form-group id="inputHeadGroup" label="Title" label-for="inputHead">
-                <b-form-input id="inputHead" v-model="heading.head" placeholder="Enter title" />
+                <b-form-input
+                  id="inputHead"
+                  v-model="new_heading.header"
+                  placeholder="Enter title"
+                />
               </b-form-group>
               <b-form-group id="inputBodyGroup" label="Main Text" label-for="inputBody">
-                <b-form-textarea id="inputBody" v-model="heading.body" rows="5" />
+                <b-form-textarea id="inputBody" v-model="new_heading.body" rows="5" />
               </b-form-group>
               <b-form-group id="inputTagsGroup" label="Select Tags" label-for="inputTags">
-                <b-form-select v-model="heading.tags" :options="tags" multiple id="inputTags" />
+                <b-form-select v-model="new_tags" :options="tags" multiple id="inputTags" />
               </b-form-group>
               <b-button type="submit" variant="primary" v-on:click="editData()">Save</b-button>
             </b-form>
@@ -85,20 +102,47 @@ export default {
       return this.$store.getters.isLoggedIn;
     }
   },
+  watch: {
+  $route: function() {
+    this.getData()
+  }
+},
+
+  props: {
+    heading: {
+      type: Object
+    },
+    visibleEdit: {
+      type: Boolean,
+      default: false
+    },
+    visibleAnswer: {
+      type: Boolean,
+      default: false
+    },
+    messages: {
+      type: Array
+    },
+    author: {
+      type: String
+    },
+    head_tags: {
+      type: Array
+    }
+  },
 
   data() {
     return {
       head_uuid: this.$route.params.head_uuid,
-      heading: {
-        type: Object
-      },
-      messages: [],
-      visibleEdit: false,
-      visibleAnswer: false,
       tags: [],
       new_message: {
         type: Object
-      }
+      },
+      new_heading: {
+        type: Object,
+        default: this.heading
+      },
+      new_tags: null
     };
   },
 
@@ -113,7 +157,10 @@ export default {
       })
         .then(response => {
           this.heading = response.data;
+          this.getUsername(response.data.user_uuid);
           this.getMessages();
+          this.getTags();
+          this.getTagsNames(response.data.tags)
         })
         .catch(err => {
           this.$bvToast.toast(err.message, {
@@ -121,14 +168,15 @@ export default {
             variant: "danger"
           });
         });
-      this.getTags();
     },
     editData() {
       if (this.validData()) {
+        this.new_heading.tags = this.new_tags;
+        this.new_heading.user_uuid = this.heading.user_uuid;
         this.visibleEdit = false;
         Axios.patch(
           `http://localhost:8083/headings/${this.head_uuid}/`,
-          this.heading,
+          this.new_heading,
           {
             headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
           }
@@ -166,12 +214,7 @@ export default {
         });
     },
     validData() {
-      if (this.heading.head.length == 0) {
-        this.$bvToast.toast("Enter Title", {
-          title: "Error",
-          variant: "danger"
-        });
-      }
+      return true;
     },
     getMessages() {
       Axios.get(`http://localhost:8082/messages/`, {
@@ -193,7 +236,10 @@ export default {
         headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
       })
         .then(response => {
-          this.tags = response.data;
+          for (let index = 0; index < response.data.length; index++) {
+            const element = response.data[index];
+            this.tags.push({ value: element.uuid, text: element.name });
+          }
         })
         .catch(err => {
           this.$bvToast.toast(err.message, {
@@ -203,12 +249,12 @@ export default {
         });
     },
     createMessage() {
-      let data = new FormData()
-      data.append('body', this.new_message.body)
-      data.append('user_uuid', this.$store.getters.userUUID)
-      data.append('head_uuid', this.head_uuid)
-      data.append('file', this.new_message.file)
-      data.append('image', this.new_message.image)
+      let data = new FormData();
+      data.append("body", this.new_message.body);
+      data.append("user_uuid", this.$store.getters.userUUID);
+      data.append("head_uuid", this.head_uuid);
+      data.append("file", this.new_message.file);
+      data.append("image", this.new_message.image);
       Axios.post("http://localhost:8082/messages/", data, {
         headers: {
           Authorization: `Bearer ${this.$store.getters.getToken}`,
@@ -227,6 +273,36 @@ export default {
             variant: "danger"
           });
         });
+    },
+    formatDate(date) {
+      let dat = new Date(date);
+      var formatter = new Intl.DateTimeFormat("en-gb", {
+        weekday: "long",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric"
+      });
+      return formatter.format(dat);
+    },
+    getUsername(uuid) {
+      this.author = uuid;
+      Axios.get(`http://localhost:8081/get_user/${uuid}/`, {
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+      }).then(response => {
+        this.author = response.data.username;
+      });
+    },
+    getTagsNames(uuids){
+      this.head_tags = []
+      uuids.forEach(element => {
+        Axios.get(`http://localhost:8083/get_tags/${element}/`, {
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+      }).then(response => {
+          this.head_tags.push(response.data.name)
+        })
+      });
     }
   }
 };

@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import axios from 'axios'
-import { HTTPAuth } from '../api/common'
+import Axios from 'axios'
 
 Vue.use(Vuex)
 
@@ -13,8 +13,8 @@ export default new Vuex.Store({
     refresh_token: localStorage.getItem('refresh_token') || '',
     token_type: '',
     access_token: localStorage.getItem('access_token') || '',
-    user_uuid: '',
-    is_staff: false
+    user_uuid: localStorage.getItem('uuid') || '',
+    is_staff: localStorage.getItem('is_staff') || false,
   },
   mutations: {
     auth_request(state) {
@@ -50,13 +50,15 @@ export default new Vuex.Store({
     login({ commit }, user) {
       return new Promise((resolve, reject) => {
         commit('auth_request')
-        HTTPAuth.post('user/login/', user)
+        Axios.post('http://localhost:8080/user/login/', user)
           .then(resp => {
             const token = resp.data.token
             const user = resp.data.user
             const uuid = resp.data.uuid
-            const is_staff = resp.data.is_superuser
-            console.log(this.state.uuid)
+            const is_staff = resp.data.is_staff
+            localStorage.setItem('token', token)
+            localStorage.setItem('uuid', uuid)
+            localStorage.setItem('is_staff', is_staff)
             axios.defaults.headers.common['Authorization'] = token
             commit('auth_success', {'token':token, 'user':user, 'uuid':uuid, 'is_staff':is_staff})
             resolve(resp)
@@ -66,6 +68,7 @@ export default new Vuex.Store({
             commit('auth_error')
             localStorage.removeItem('token')
             console.log('auth_with_errors')
+            console.log(err)
             reject(err)
           })
       })
@@ -84,6 +87,8 @@ export default new Vuex.Store({
         try {
           commit('logout')
           localStorage.removeItem('token')
+          localStorage.removeItem('uuid')
+          localStorage.removeItem('is_staff')
           localStorage.removeItem('access_token')
           delete axios.defaults.headers.common['Authorization']
           resolve()

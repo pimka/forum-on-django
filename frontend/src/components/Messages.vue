@@ -1,19 +1,28 @@
 <template>
   <div>
     <b-card-group flush>
-      <b-card :header="item.parent" :footer="[item.created, item.user_uuid]">
+      <b-card :header="item.parent">
         <b-card-text>{{ item.body }}</b-card-text>
-        <b-img :src="server+item.image" alt="Image"></b-img>
+        <template v-if="item.image">
+          <b-img :src="server+item.image" alt="Image"></b-img>
+        </template>
         <hr />
-        <b-link :href="server+item.file">File</b-link>
-        <hr />
+        <template v-if="item.file">
+          <b-link :href="server+item.file">File</b-link>
+          <hr />
+        </template>
         <template v-if="isLoggedIn">
           <b-button v-on:click="visibleReply=true" variant="primary">Reply</b-button>
         </template>
-        <template v-if="isLoggedIn & this.$store.getters.userUUID==item.user_uuid">
+        <template
+          v-if="isLoggedIn & (this.$store.getters.userUUID==item.user_uuid || this.$store.getters.isStaff)"
+        >
           <b-button v-on:click="visibleEdit=true" variant="primary">Edit</b-button>
           <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
         </template>
+        <b-card-footer>
+          <a>Creator: {{ author }}<br>Created {{ formatDate(item.created) }}</a>
+        </b-card-footer>
       </b-card>
 
       <template v-if="visibleEdit">
@@ -49,7 +58,7 @@
                 placeholder="Choose a image or drop it here..."
               />
             </b-form-group>
-            <b-button type="submit" variant="primary" v-on:click="editData()">Save</b-button>
+            <b-button type="submit" variant="primary" v-on:click="replyData()">Save</b-button>
           </form>
         </b-card>
       </template>
@@ -76,6 +85,9 @@ export default {
     server: {
       type: String,
       default: "http://localhost:8082"
+    },
+    author: {
+      type: String
     }
   },
 
@@ -91,6 +103,10 @@ export default {
         type: Object
       }
     };
+  },
+
+  created() {
+    this.getUsername()
   },
 
   methods: {
@@ -136,10 +152,25 @@ export default {
     },
     replyData() {
       this.visibleReply = false;
-      this.new_item.parent = this.item.uuid;
+      let data = new FormData();
+      data.append("body", this.new_item.body);
+      data.append("user_uuid", this.$store.getters.userUUID);
+      data.append("head_uuid", this.item.head_uuid);
+      data.append("parent", this.item.uuid);
+      if (this.new_item.file == null || this.new_item.file == undefined) {
+        data.append("file", "");
+      } else {
+        data.append("file", this.new_item.file);
+      }
+      if (this.new_item.image == null || this.new_item.image == undefined) {
+        data.append("image", "");
+      } else {
+        data.append("image", this.new_item.image);
+      }
       if (this.validData()) {
-        Axios.post("http://localhost:8082/messages/", this.new_item, {
-          headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+        Axios.post("http://localhost:8082/messages/", data, {
+          headers: { Authorization: `Bearer ${this.$store.getters.getToken}` },
+          "Content-Type": "multipart/form-data"
         })
           .then(() => {
             this.$bvToast.toast("Messages edited", {
@@ -157,6 +188,27 @@ export default {
     },
     validData() {
       return true;
+    },
+    formatDate(date) {
+      let dat = new Date(date);
+      var formatter = new Intl.DateTimeFormat("en-gb", {
+        weekday: "long",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric"
+      });
+      return formatter.format(dat);
+    },
+    getUsername() {
+      var uuid = this.item.user_uuid
+      this.author = uuid;
+      Axios.get(`http://localhost:8081/get_user/${uuid}/`, {
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+      }).then(response => {
+        this.author = response.data.username;
+      });
     }
   }
 };
