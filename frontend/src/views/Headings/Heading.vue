@@ -7,7 +7,7 @@
         <template>
           <b-badge v-for="tag in head_tags" :key="tag">{{ tag }}</b-badge>
         </template>
-        <br/>
+        <br />
         <template v-if="isLoggedIn">
           <b-button v-on:click="visibleAnswer=true" variant="primary">Answer</b-button>
         </template>
@@ -38,10 +38,11 @@
                   id="inputHead"
                   v-model="new_heading.header"
                   placeholder="Enter title"
+                  required
                 />
               </b-form-group>
               <b-form-group id="inputBodyGroup" label="Main Text" label-for="inputBody">
-                <b-form-textarea id="inputBody" v-model="new_heading.body" rows="5" />
+                <b-form-textarea id="inputBody" required v-model="new_heading.body" rows="5" />
               </b-form-group>
               <b-form-group id="inputTagsGroup" label="Select Tags" label-for="inputTags">
                 <b-form-select v-model="new_tags" :options="tags" multiple id="inputTags" />
@@ -58,7 +59,7 @@
           <b-card-text>
             <b-form>
               <b-form-group id="inputBodyGroup" label="Main text" label-for="inputBody">
-                <b-form-textarea id="inputBody" v-model="new_message.body" rows="5" />
+                <b-form-textarea id="inputBody" required v-model="new_message.body" rows="5" />
               </b-form-group>
               <b-form-group id="inputFileGroup" label="File" label-for="inputFile">
                 <b-form-file
@@ -103,10 +104,10 @@ export default {
     }
   },
   watch: {
-  $route: function() {
-    this.getData()
-  }
-},
+    $route: function() {
+      this.getData();
+    }
+  },
 
   props: {
     heading: {
@@ -160,7 +161,7 @@ export default {
           this.getUsername(response.data.user_uuid);
           this.getMessages();
           this.getTags();
-          this.getTagsNames(response.data.tags)
+          this.getTagsNames(response.data.tags);
         })
         .catch(err => {
           this.$bvToast.toast(err.message, {
@@ -214,6 +215,13 @@ export default {
         });
     },
     validData() {
+      if (this.new_tags.length == 0) {
+        this.$bvToast.toast("Select tag", {
+          title: "Error",
+          variant: "danger"
+        });
+        return false;
+      }
       return true;
     },
     getMessages() {
@@ -294,14 +302,14 @@ export default {
         this.author = response.data.username;
       });
     },
-    getTagsNames(uuids){
-      this.head_tags = []
+    getTagsNames(uuids) {
+      this.head_tags = [];
       uuids.forEach(element => {
         Axios.get(`http://localhost:8083/get_tags/${element}/`, {
-        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
-      }).then(response => {
-          this.head_tags.push(response.data.name)
-        })
+          headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+        }).then(response => {
+          this.head_tags.push(response.data.name);
+        });
       });
     }
   }

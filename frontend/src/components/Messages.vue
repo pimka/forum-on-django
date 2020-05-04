@@ -21,7 +21,11 @@
           <b-button v-on:click="deleteData()" variant="danger">Delete</b-button>
         </template>
         <b-card-footer>
-          <a>Creator: {{ author }}<br>Created {{ formatDate(item.created) }}</a>
+          <a>
+            Creator: {{ author }}
+            <br />
+            Created {{ formatDate(item.created) }}
+          </a>
         </b-card-footer>
       </b-card>
 
@@ -30,7 +34,7 @@
           <b-card-title>Edit message</b-card-title>
           <form>
             <b-form-group id="inputBodyGroup" label="Main text" label-for="inputBody">
-              <b-form-input id="inputBody" v-model="item.body" />
+              <b-form-input required id="inputBody" v-model="item.body" />
             </b-form-group>
             <b-button type="submit" variant="primary" v-on:click="editData()">Save</b-button>
           </form>
@@ -42,7 +46,7 @@
           <b-card-title>Reply</b-card-title>
           <form>
             <b-form-group id="inputBodyGroup" label="Main text" label-for="inputBody">
-              <b-form-input id="inputBody" v-model="new_item.body" />
+              <b-form-input id="inputBody" required v-model="new_item.body" />
             </b-form-group>
             <b-form-group id="inputFileGroup" label="File" label-for="inputFile">
               <b-form-file
@@ -106,32 +110,30 @@ export default {
   },
 
   created() {
-    this.getUsername()
+    this.getUsername();
   },
 
   methods: {
     editData() {
-      if (this.validData()) {
-        this.visibleEdit = false;
-        var temp = this.item;
-        delete temp.file;
-        delete temp.image;
-        Axios.patch(`http://localhost:8082/messages/${this.item.uuid}/`, temp, {
-          headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
-        })
-          .then(() => {
-            this.$bvToast.toast("Messages edited", {
-              title: "Success",
-              variant: "success"
-            });
-          })
-          .catch(err => {
-            this.$bvToast.toast(err.message, {
-              title: "Error",
-              variant: "danger"
-            });
+      this.visibleEdit = false;
+      var temp = this.item;
+      delete temp.file;
+      delete temp.image;
+      Axios.patch(`http://localhost:8082/messages/${this.item.uuid}/`, temp, {
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
+      })
+        .then(() => {
+          this.$bvToast.toast("Messages edited", {
+            title: "Success",
+            variant: "success"
           });
-      }
+        })
+        .catch(err => {
+          this.$bvToast.toast(err.message, {
+            title: "Error",
+            variant: "danger"
+          });
+        });
     },
     deleteData() {
       Axios.delete(`http://localhost:8082/messages/${this.item.uuid}/`, {
@@ -167,27 +169,22 @@ export default {
       } else {
         data.append("image", this.new_item.image);
       }
-      if (this.validData()) {
-        Axios.post("http://localhost:8082/messages/", data, {
-          headers: { Authorization: `Bearer ${this.$store.getters.getToken}` },
-          "Content-Type": "multipart/form-data"
-        })
-          .then(() => {
-            this.$bvToast.toast("Messages edited", {
-              title: "Success",
-              variant: "success"
-            });
-          })
-          .catch(err => {
-            this.$bvToast.toast(err.message, {
-              title: "Error",
-              variant: "danger"
-            });
+      Axios.post("http://localhost:8082/messages/", data, {
+        headers: { Authorization: `Bearer ${this.$store.getters.getToken}` },
+        "Content-Type": "multipart/form-data"
+      })
+        .then(() => {
+          this.$bvToast.toast("Messages edited", {
+            title: "Success",
+            variant: "success"
           });
-      }
-    },
-    validData() {
-      return true;
+        })
+        .catch(err => {
+          this.$bvToast.toast(err.message, {
+            title: "Error",
+            variant: "danger"
+          });
+        });
     },
     formatDate(date) {
       let dat = new Date(date);
@@ -202,7 +199,7 @@ export default {
       return formatter.format(dat);
     },
     getUsername() {
-      var uuid = this.item.user_uuid
+      var uuid = this.item.user_uuid;
       this.author = uuid;
       Axios.get(`http://localhost:8081/get_user/${uuid}/`, {
         headers: { Authorization: `Bearer ${this.$store.getters.getToken}` }
