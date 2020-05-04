@@ -15,7 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from rest_framework.urlpatterns import format_suffix_patterns
+from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('heading/', views.HeadingsView.as_view()),
+    path('heading/<uuid:head_uuid>/', views.ConcreteHeadingView.as_view())
 ]
