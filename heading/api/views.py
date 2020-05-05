@@ -26,7 +26,7 @@ class BaseView(APIView):
         super().__init__(**kwargs)
 
     def send_task(self, operation, user_uuid=None, before=None, after=None):
-        self.celery.send_task(self.task_name, [user_uuid, operation, before, after])
+        self.celery.send_task(self.task_name, [user_uuid, operation, str(before), str(after)])
 
     def exception(self, request, message):
         self.logger.exception(self.__format.format(
@@ -186,7 +186,7 @@ class GetConcreteHeadingView(BaseView):
 
         serializer = HeadingSerializer(head)
         self.send_task('GET HEADING', user_uuid, after=serializer.data)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class HeadingAdvancedOperations(BaseView):
     authentication_classes = [TokenAuth]

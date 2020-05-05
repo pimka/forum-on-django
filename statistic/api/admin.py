@@ -9,12 +9,12 @@ from .models import StatisicModel
 
 def export_data(modeladmin, request, queryset):
     response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-    filename = f'report-{datetime.datetime.now().strftime('%Y-%m-%d')}'
+    filename = f"report-{datetime.datetime.now().strftime('%Y-%m-%d')}"
     response['Content-Disposition'] = f'attachment; filename="{filename}"'
 
     wb = openpyxl.Workbook()
-    ws = wb.active()
-    headers = ['N', 'user_uuid', 'datetime', 'operation', 'before', 'after']
+    ws = wb.active
+    headers = ['user_uuid', 'datetime', 'operation', 'before', 'after']
 
     for col, header in enumerate(headers):
         ws.cell(row=1, column=col+1, value=header)
@@ -31,7 +31,7 @@ export_data.short_description = 'Export to file'
 
 class StatisticAdmin(admin.ModelAdmin):
     list_display = ['user_uuid', 'operation', 'datetime_operation']
-    ordering = ['datetime_operation']
+    ordering = ['-datetime_operation']
     actions = [export_data]
 
 admin.site.register(StatisicModel, StatisticAdmin)

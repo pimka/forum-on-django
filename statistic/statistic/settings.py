@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -121,3 +123,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+URLS = {
+    'auth-token': 'http://localhost:8080/tokens/',
+    'send-credentials': 'http://localhost:8080/user/add/',
+    'update-credentials' : 'http://localhost:8080/user/{uuid}/',
+    'login': 'http://localhost:8080/user/login/'
+}
+
+AUTHENTICATION_BACKENDS = [
+    'api.back.AuthBackend'
+]
