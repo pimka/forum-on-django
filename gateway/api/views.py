@@ -310,3 +310,117 @@ class ConcreteUserView(BaseView):
             self.exception(request, str(err))
             return Response(str(err), patch_request.status_code)
 
+
+class HeadingMessagesView(BaseView):
+    def get(self, request, head_uuid):
+        self.info(request, f'get heading {head_uuid}')
+        user_uuid = self.getUserUUID(request)
+        try:
+            get_request = requests.get(
+                f"{self.URL['heading']}/heading/{head_uuid}/")
+            self.send_task('GET HEADING', user_uuid, after=get_request.json())
+
+            if get_request.status_code >= 200 and get_request.status_code < 300:
+                get_mes_request = requests.get(
+                    self.URL['message']+'/messages/', params={'heading': head_uuid})
+                self.send_task('GET MESSAGES', user_uuid,
+                               after=get_mes_request.json())
+
+                return Response(get_mes_request.json(), get_mes_request.status_code)
+
+            return Response({'error': 'Heading does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as err:
+            self.exception(request, str(err))
+            return Response(str(err), status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    def post(self, request, head_uuid):
+        self.info(request, f'get heading {head_uuid}')
+        user_uuid = self.getUserUUID(request)
+        try:
+            get_request = requests.get(
+                f"{self.URL['heading']}/heading/{head_uuid}/")
+            self.send_task('GET HEADING', user_uuid, after=get_request.json())
+
+            if get_request.status_code >= 200 and get_request.status_code < 300:
+                request.data['head_uuid'] = head_uuid
+                post_mes_request = requests.post(
+                    self.URL['message']+'/messages/', request.data)
+                self.send_task('POST MESSAGE', user_uuid,
+                               after=post_mes_request.json())
+
+                return Response(post_mes_request.json(), post_mes_request.status_code)
+
+            return Response({'error': 'Heading does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as err:
+            self.exception(request, str(err))
+            return Response(str(err), status.HTTP_503_SERVICE_UNAVAILABLE)
+
+
+class ConcreteHeadingMessageView(BaseView):
+    def get(self, request, head_uuid, mes_uuid):
+        self.info(request, f'get heading {head_uuid}')
+        user_uuid = self.getUserUUID(request)
+        try:
+            get_request = requests.get(
+                f"{self.URL['heading']}/heading/{head_uuid}/")
+            self.send_task('GET HEADING', user_uuid, after=get_request.json())
+
+            if get_request.status_code >= 200 and get_request.status_code < 300:
+                get_mes_request = requests.get(
+                    f"{self.URL['message']}/message/{mes_uuid}/")
+                self.send_task('GET MESSAGE', user_uuid,
+                               after=get_mes_request.json())
+
+                return Response(get_mes_request.json(), get_mes_request.status_code)
+
+            return Response({'error': 'Heading does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as err:
+            self.exception(request, str(err))
+            return Response(str(err), status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    def patch(self, request, head_uuid, mes_uuid):
+        self.info(request, f'get heading {head_uuid}')
+        user_uuid = self.getUserUUID(request)
+        try:
+            get_request = requests.get(
+                f"{self.URL['heading']}/heading/{head_uuid}/")
+            self.send_task('GET HEADING', user_uuid, after=get_request.json())
+
+            if get_request.status_code >= 200 and get_request.status_code < 300:
+                request.data['head_uuid'] = head_uuid
+                patch_mes_request = requests.patch(
+                    f"{self.URL['message']}/message/{mes_uuid}/", request.data)
+                self.send_task('PATCH MESSAGE', user_uuid,
+                               after=patch_mes_request.json())
+
+                return Response(patch_mes_request.json(), patch_mes_request.status_code)
+
+            return Response({'error': 'Heading does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as err:
+            self.exception(request, str(err))
+            return Response(str(err), status.HTTP_503_SERVICE_UNAVAILABLE)
+
+    def delete(self, request, head_uuid, mes_uuid):
+        self.info(request, f'get heading {head_uuid}')
+        user_uuid = self.getUserUUID(request)
+        try:
+            get_request = requests.get(
+                f"{self.URL['heading']}/heading/{head_uuid}/")
+            self.send_task('GET HEADING', user_uuid, after=get_request.json())
+
+            if get_request.status_code >= 200 and get_request.status_code < 300:
+                get_mes_request = requests.delete(
+                    f"{self.URL['message']}/message/{mes_uuid}/")
+                self.send_task('DELETE MESSAGE', user_uuid)
+
+                return Response(get_mes_request.json(), get_mes_request.status_code)
+
+            return Response({'error': 'Heading does not exist'}, status.HTTP_404_NOT_FOUND)
+
+        except requests.RequestException as err:
+            self.exception(request, str(err))
+            return Response(str(err), status.HTTP_503_SERVICE_UNAVAILABLE)
