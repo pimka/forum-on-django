@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from celery_queue.config import Config
 
-from .auth import TokenAuth
+from .auth import TokenAuth, TokenOAuth2
 from .models import MessageModel
 from .permissions import IsAuthenticate, IsOwner
 from .serializers import MessageSerializer
@@ -70,7 +70,7 @@ class MessageBaseOperations(BaseView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class MessageAdvancedOperations(BaseView):
-    authentication_classes = [TokenAuth]
+    authentication_classes = [TokenAuth, TokenOAuth2]
     permission_classes = [IsAuthenticate, IsOwner]
 
     def get_object(self, uuid):

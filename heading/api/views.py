@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 
 from celery_queue.config import Config
 
-from .auth import TokenAuth
+from .auth import TokenAuth, TokenOAuth2
 from .models import HeadingModel, TagModel
 from .permissions import IsAuthenticate, IsOwner
 from .serializers import HeadingSerializer, TagSerializer
@@ -55,7 +55,7 @@ class GetTagsView(BaseView):
         return Response(serializer.data)
 
 class TagBaseOperations(BaseView):
-    authentication_classes = [TokenAuth]
+    authentication_classes = (TokenAuth, TokenOAuth2)
     permission_classes = [IsAuthenticate]
 
     def post(self, request):
@@ -104,7 +104,7 @@ class GetHeadingsView(BaseView):
         return Response(serializer.data)
 
 class HeadingBaseOperations(BaseView):
-    authentication_classes = [TokenAuth]
+    authentication_classes = (TokenAuth, TokenOAuth2)
     permission_classes = [IsAuthenticate]
 
     def post(self, request):
@@ -136,7 +136,7 @@ class GetTagView(BaseView):
         return Response(serializer.data)
 
 class TagAdvancedOperations(BaseView):
-    authentication_classes = [TokenAuth]
+    authentication_classes = (TokenAuth, TokenOAuth2)
     permission_classes = [IsAuthenticate]
 
     def get_object(self, uuid):
@@ -189,7 +189,7 @@ class GetConcreteHeadingView(BaseView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 class HeadingAdvancedOperations(BaseView):
-    authentication_classes = [TokenAuth]
+    authentication_classes = (TokenAuth, TokenOAuth2)
     permission_classes = [IsAuthenticate, IsOwner]
 
     def get_object(self, uuid):

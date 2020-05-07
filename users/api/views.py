@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .auth import TokenAuth
+from .auth import TokenAuth, TokenOAuth2
 from .models import User
 from .permissions import IsAuthenticate, IsOwner
 from .serializers import UserSerializer
@@ -32,7 +32,7 @@ class BaseView(APIView):
 
 class UserBaseOperations(BaseView):
     permission_classes = [IsAuthenticate]
-    authentication_classes = [TokenAuth]
+    authentication_classes = [TokenAuth, TokenOAuth2]
 
     def post(self, request):
         self.info(request, 'Add user')

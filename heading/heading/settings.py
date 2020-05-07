@@ -127,7 +127,11 @@ URLS = {
     'auth-token': 'http://localhost:8080/user/auth/',
     'send-credentials': 'http://localhost:8080/users/',
     'update-credentials' : 'http://localhost:8080/users/{uuid}/',
-    'login': 'http://localhost:8080/user/login/'
+    'login': 'http://localhost:8080/user/login/',
+    'token-oauth2': 'http://localhost:8080/oauth2/token/',
+    'token-revoke-oauth2': 'http://localhost:8080/oauth2/revoke_token/',
+    'exchange-code-oauth2': 'http://localhost:8080/oauth2/token/',
+    'authenticate-oauth2': 'http://localhost:8080/oauth2/logged-in',
 }
 
 AUTHENTICATION_BACKENDS = [

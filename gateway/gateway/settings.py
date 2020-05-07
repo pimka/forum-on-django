@@ -120,3 +120,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+OAUTH2 = {
+    'CLIENT_ID': os.environ.get('CLIENT_ID', 'xM3AOMPLsDxC0AeFU6nncrTOb4JJLxvIlUl1lwCj'),
+    'CLIENT_SECRET': os.environ.get('CLIENT_SECRET', 'xDvGLbj0dqzgE6reFOxOxoC5ZaBgoLYCHNHoYhdcV7hNC8KCVZ7cOWqdlmXOqX8XrXdNqqK3RroDkSuNLS7IwEjxKGZpHiRBHMefaoZ0AC8o1JJ1F0pECVtYI3B5b68q'),
+}

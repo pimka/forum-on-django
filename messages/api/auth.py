@@ -23,8 +23,7 @@ class TokenAuth(TokenAuthentication):
         data, st = self.authenticate(key)
 
         if st != 200:
-            msg = data.get('error', 'Invalid token')
-            raise AuthenticationFailed(msg, 'authentication')
+            return None
 
         data['token'] = key
         return (None, data)
@@ -36,6 +35,31 @@ class TokenAuth(TokenAuthentication):
             return { ERRORS_FIELD : str(err)}, 503
 
         return response.json(), response.status_code
+
+class TokenOAuth2(TokenAuthentication):
+    keyword = 'Bearer'
+
+    def authenticate_credentials(self, key):
+        data, st = self.auth(key)
+
+        if st != 200:
+            msg = data.get('error', 'Invalid token')
+            raise AuthenticationFailed(msg, 'authentication')
+
+        data['token'] = key
+        return (None, data)
+
+    def auth(self, token):
+        try:
+            response = requests.get(
+                URLS['authenticate-oauth2'], headers={'Authorization': f'{self.keyword} {token}'})
+        except requests.RequestException as err:
+            return {ERRORS_FIELD: str(err)}, 503
+
+        return response.json(), response.status_code
+
+    def authenticate(self, request):
+        return super().authenticate(request)
 
 class TokenAuthorize:
     def __init__(self, storage, new, id, secret, token_label='<service>-token', token_type='Bearer'):

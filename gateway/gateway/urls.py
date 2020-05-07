@@ -16,10 +16,31 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from rest_framework.urlpatterns import format_suffix_patterns
-from api import views
+import api.views.open as open
+import api.views.close as close
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('heading/', views.HeadingsView.as_view()),
-    path('heading/<uuid:head_uuid>/', views.ConcreteHeadingView.as_view())
+    path('get_headings/', open.GetHeadingsView.as_view()),
+    path('get_heading/', open.GetConcreteHeadingView.as_view()),
+    path('get_tags/', open.GetTagsView.as_view()),
+    path('get_messages/', open.GetMessagesView.as_view()),
+    path('get_message/', open.GetConcreteMessageView.as_view()),
+    path('add_user/', open.UsersView.as_view()),
+    path('get_user/', open.GetConcreteUserView.as_view()),
+    path('heading/<uuid:head_uuid>/get_messages/', open.GetHeadingMessagesView.as_view()),
+    
+    path('refresh/', close.RefreshTokenView.as_view()),
+    path('revoke/', close.RevokeTokenView.as_view()),
+    path('code-exchange/', open.CodeExchangeView.as_view()),
+    
+    path('heading/', close.PostHeadingsView.as_view()),
+    path('heading/<uuid:head_uuid>/', close.ConcreteHeadingView.as_view()),
+    path('tags/', close.TagsView.as_view()),
+    path('tag/<uuid:tag_uuid>/', close.ConcreteTagView.as_view()),
+    path('messages/', close.MessagesView.as_view()),
+    path('message/<uuid:mes_uuid>/', close.ConcreteMessageView.as_view()),
+    path('user/<uuid:user_uuid>/', close.ConcreteUserView.as_view()),
+    path('heading/<uuid:head_uuid>/messages/', close.HeadingMessagesView.as_view()),
+    path('heading/<uuid:head_uuid>/message/<uuid:mes_uuid>/', close.ConcreteHeadingMessageView.as_view())
 ]

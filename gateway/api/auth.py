@@ -7,8 +7,17 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 
-from heading.settings import URLS
 
+__default_urls = {
+    'token-oauth2': 'http://localhost:8080/oauth2/token/',
+    'token-revoke-oauth2': 'http://localhost:8080/oauth2/revoke_token/',
+    'exchange-code-oauth2': 'http://localhost:8080/oauth2/token/',
+    'authenticate-oauth2': 'http://localhost:8080/oauth2/logged-in',
+    'authenticate': 'http://localhost:8080/v0/users/logged-in',
+    'login': 'http://localhost:8080/v0/users/login',
+    'auth-token': 'http://localhost:8080/v0/tokens',
+}
+URLS = getattr(settings, 'URLS', __default_urls)
 ERRORS_FIELD = getattr(settings, 'ERRORS_FIELD', 'error')
 STORAGE = StrictRedis(decode_responses=True)
 
@@ -16,35 +25,9 @@ ID = getattr(settings, 'APPID', 'users')
 SECRET = getattr(settings, 'APPSECRET', 'users-secret')
 TOKEN_LABEL = getattr(settings, 'TOKEN_LABEL', 'users-service-token')
 
-
-class TokenAuth(TokenAuthentication):
-    keyword = 'Bearer'
-
-    def authenticate_credentials(self, key):
-        data, st = self.auth(key)
-
-        if st != 200:
-            return None
-
-        data['token'] = key
-        return (None, data)
-
-    def auth(self, token):
-        try:
-            response = requests.get(
-                URLS['auth-token'], headers={'Authorization': f'{self.keyword} {token}'})
-        except requests.RequestException as err:
-            return {ERRORS_FIELD: str(err)}, 503
-
-        return response.json(), response.status_code
-
-    def authenticate(self, request):
-        return super().authenticate(request)
-
-
 class TokenOAuth2(TokenAuthentication):
     keyword = 'Bearer'
-
+    
     def authenticate_credentials(self, key):
         data, st = self.auth(key)
 
@@ -57,16 +40,14 @@ class TokenOAuth2(TokenAuthentication):
 
     def auth(self, token):
         try:
-            response = requests.get(
-                URLS['authenticate-oauth2'], headers={'Authorization': f'{self.keyword} {token}'})
+            response = requests.get(URLS['authenticate-oauth2'], headers={'Authorization': f'{self.keyword} {token}'})
         except requests.RequestException as err:
-            return {ERRORS_FIELD: str(err)}, 503
+            return { ERRORS_FIELD : str(err)}, 503
 
         return response.json(), response.status_code
 
     def authenticate(self, request):
         return super().authenticate(request)
-
 
 class TokenAuthorize:
     def __init__(self, storage, new, id, secret, token_label='<service>-token', token_type='Bearer'):
@@ -102,30 +83,25 @@ class TokenAuthorize:
 
     def call(self, function, *args, **kwargs):
         if self.token:
-            kwargs.update(
-                {'headers': {'Authorization': f'{self.type} {self.token}'}})
+            kwargs.update({ 'headers' : {'Authorization' : f'{self.type} {self.token}'} })
             json, st = function(*args, **kwargs)
 
             if st not in [401, 402]:
                 return (json, st)
 
         self.__update()
-        kwargs.update(
-            {'headers': {'Authorization': f'{self.type} {self.token}'}})
-
+        kwargs.update({ 'headers' : {'Authorization' : f'{self.type} {self.token}'} })
+        
         return function(*args, **kwargs)
-
 
 def token(id, secret):
     try:
-        response = requests.post(
-            URLS['auth-token'], {'id': id, 'secret': secret})
+        response = requests.post(URLS['auth-token'], {'id': id, 'secret': secret})
 
     except requests.RequestException as err:
         return ({ERRORS_FIELD: str(err)}, 503)
 
     return response.json(), response.status_code
-
 
 @TokenAuthorize(STORAGE, token, ID, SECRET, TOKEN_LABEL)
 def send_credentials(credentials):
@@ -136,12 +112,10 @@ def send_credentials(credentials):
 
     return response.json(), response.status_code
 
-
 @TokenAuthorize(STORAGE, token, ID, SECRET, TOKEN_LABEL)
 def update_credentials(uuid, credentials):
     try:
-        response = requests.put(
-            URLS['update-credentials'].format(uuid=uuid), credentials)
+        response = requests.put(URLS['update-credentials'].format(uuid=uuid), credentials)
     except requests.RequestException as err:
         return ({ERRORS_FIELD: str(err)}, 503)
 
