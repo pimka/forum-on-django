@@ -45,7 +45,8 @@ class UserAuth(BasicAuthentication):
             user = authenticate(username=username, password=password)
             if not user:
                 raise AuthenticationFailed('Invalid credentials', code='authentication')
-            return (user, None)
+            else:
+                return (user, None)
 
         else:
             raise AuthenticationFailed('Empty credentials')

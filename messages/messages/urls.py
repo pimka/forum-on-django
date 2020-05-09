@@ -23,8 +23,8 @@ from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('messages/', views.MessageBaseOperations.as_view()),
-    path('messages/<uuid:uuid>/', views.MessageAdvancedOperations.as_view()),
+    path('messages/', views.MessageBaseOperations.as_view(), name='messages'),
+    path('messages/<uuid:uuid>/', views.MessageAdvancedOperations.as_view(), name='message'),
 ]
 
 urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

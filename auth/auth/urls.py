@@ -24,10 +24,10 @@ from api.views import (AuthTokenView, OAuth2View, ServicesTokenView,
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('oauth2/logged-in/', OAuth2View.as_view()),
-    path('tokens/', ServicesTokenView.as_view()),
-    path('user/auth/', AuthTokenView.as_view()),
+    path('tokens/', ServicesTokenView.as_view(), name='tokens'),
+    path('user/auth/', AuthTokenView.as_view(), name='auth'),
     path('user/add/', UsersBaseView.as_view()),
-    path('user/login/', UsersLoginView.as_view()),
+    path('user/login/', UsersLoginView.as_view(), name='login_user'),
     path('user/<uuid:uuid>/', UsersAdvancedView.as_view()),
 
     path("oauth2/", include("oauth2_provider.urls", namespace="oauth2_provider")),

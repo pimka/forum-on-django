@@ -151,6 +151,10 @@ SERVICES_CREDENTIALS = {
     'statistics' : {
         'id' : 'statistic',
         'secret' : 'statistic8084'
+    },
+    'auth' : {
+        'id' : 'auth',
+        'secret' : 'auth8080'
     }
 }
 
