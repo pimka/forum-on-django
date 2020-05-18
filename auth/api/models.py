@@ -12,7 +12,7 @@ class TokenBaseModel(models.Model):
     class Meta:
         abstract = True
 
-    token = models.CharField(verbose_name='Token', unique=True, max_length=20)
+    token = models.CharField(verbose_name='Token', unique=True, max_length=50)
     created = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

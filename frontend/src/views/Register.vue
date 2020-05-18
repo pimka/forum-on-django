@@ -55,13 +55,13 @@ export default {
                     title: 'Success',
                     variant: 'success'
                 })
+                this.login()
             }).catch(err => {
                 this.$bvToast.toast(err.message, {
                     title: 'Error',
                     variant: 'danger'
                 })
             })
-            this.login()
         }
     }
 }
