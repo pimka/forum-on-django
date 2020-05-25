@@ -1,0 +1,18 @@
+language:
+    python
+  
+  python:
+    - '3.6.9'
+  
+  install:
+    - pip install -r requirements.txt
+  
+  script:
+    - cd auth
+    - coverage run manage.py test
+  
+    - cd ../heading
+    - coverage run manage.py test
+  
+    - cd ../messages
+    - coverage run manage.py test

@@ -57,6 +57,7 @@ export default {
               title: "Success",
               variant: "success"
             });
+            this.$router.push("/");
           })
           .catch(err => {
             this.$bvToast.toast(err.message, {

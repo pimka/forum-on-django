@@ -20,7 +20,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from api.views import (AuthTokenView, OAuth2View, ServicesTokenView,
                        UsersAdvancedView, UsersBaseView, UsersLoginView)
 
-# http://127.0.0.1:8080/accounts/login/?next=/oauth2/authorize/%3Fclient_id%3DxM3AOMPLsDxC0AeFU6nncrTOb4JJLxvIlUl1lwCj%26response_type%3Dcode%26state%3Drandom_state_string
+# http://localhost:8080/oauth2/authorize?response_type=code&state=random_state_string&client_id=x6kmOcoE9Ft3peTuXiALmNfyCf7Y62UaF8NBHNc5
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('oauth2/logged-in/', OAuth2View.as_view()),

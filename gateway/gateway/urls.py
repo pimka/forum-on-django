@@ -22,12 +22,12 @@ import api.views.close as close
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('get_headings/', open.GetHeadingsView.as_view()),
-    path('get_heading/', open.GetConcreteHeadingView.as_view()),
+    path('get_heading/<uuid:head_uuid>/', open.GetConcreteHeadingView.as_view()),
     path('get_tags/', open.GetTagsView.as_view()),
     path('get_messages/', open.GetMessagesView.as_view()),
-    path('get_message/', open.GetConcreteMessageView.as_view()),
+    path('get_message/<uuid:mes_uuid>/', open.GetConcreteMessageView.as_view()),
     path('add_user/', open.UsersView.as_view()),
-    path('get_user/', open.GetConcreteUserView.as_view()),
+    path('get_user/<uuid:user_uuid>/', open.GetConcreteUserView.as_view()),
     path('heading/<uuid:head_uuid>/get_messages/', open.GetHeadingMessagesView.as_view()),
     
     path('refresh/', close.RefreshTokenView.as_view()),

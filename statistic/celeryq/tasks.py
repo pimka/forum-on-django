@@ -9,6 +9,8 @@ TEMPLATE = '{0}.{1}.{2}'
 MODULE = 'task'
 SPACE = 'statistic'
 
+#celery -A celeryq worker -l info
+
 def send_stats(data, requester):
     data, code = requester(data)
 

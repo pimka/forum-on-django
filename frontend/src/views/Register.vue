@@ -35,7 +35,6 @@ export default {
                         title: 'Success',
                         variant: 'success'
                     })
-                    this.$router.push('/')
                 })
                 .catch(error => { 
                     this.$bvToast.toast(error.message, {
